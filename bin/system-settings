@@ -1,1 +1,8 @@
 #!/bin/bash
+Edit 
+- fstab
+- pacman.conf
+- logind.conf
+- bootloader configs
+- mkinitcpio
+- 
