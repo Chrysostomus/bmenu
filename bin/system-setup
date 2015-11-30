@@ -1,0 +1,11 @@
+
+Choose bootloader
+Choose displaymanager
+Choose shell (choose between fish, bash, zsh and dash)
+Install wine printer support, 
+Install pipelight
+Install widevine, 
+Install Aur support
+Enable hibernation support (hibernator)
+Enable autologin
+Enable delayed hibernation
