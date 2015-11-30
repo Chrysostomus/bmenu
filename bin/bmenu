@@ -1,10 +1,82 @@
 #!/bin/bash
-Mhwd (mhwd-tui)
-Package Manager (pacli)
-Monitor (brandr)
-Appearance
-Configuration
-Setup
-Printer
-Sound (alsa-mixer/ponymixer)
-Network (nmtui/sudo wifi-menu)
+
+RED='\e[41m'
+BLUE='\e[44m'
+ORANGE='\e[46m'
+NC='\e[0m'
+systemctl status NetworkManager.service | grep -q " active " && netcommand="nmtui"
+systemctl status Netctl.service | grep -q " active " && netcommand="sudo wifi-menu"
+    while true; do
+    clear
+    echo ""
+    echo -e "                       $NC ::Main menu:: $NC "
+    echo -e " ┌─────────────────────────────────────────────────────────────┐"
+    echo -e " │  $NC  1 $NC  Hardware                   $NC  2 $NC  Display             │"
+    echo -e " │  $NC  3 $NC  Printers                   $NC  4 $NC  Appearance          │"
+    echo -e " │  $NC  5 $NC  Package manager            $NC  6 $NC  Network             │"    
+    echo -e " │  $NC  7 $NC  Sound                      $NC  8 $NC  Configuration       │"
+    echo -e " │  $NC  9 $NC  Setup                      $NC  0 $NC  Exit                │"
+    echo " └─────────────────────────────────────────────────────────────┘"
+        echo -e "             $NC Select a number and press [Enter]$NC"
+    echo ""
+    read -s -n1 choix
+    case $choix in
+        1)
+            echo
+            mhwd-tui
+            echo ""
+            ;;
+        2)
+            echo
+            brandr
+            echo ""
+            ;;
+        3)
+            echo
+            bcups
+            echo ""
+            ;;
+        4)
+            echo
+            appearance-menu
+            echo ""
+            ;;
+        5)
+            echo
+            pacli
+            echo ""
+            ;;
+        6)
+            echo
+            $netcommand
+            echo ""
+            ;;
+        7)
+            echo
+            alsamixer
+            echo ""
+            ;;
+        8)
+            echo
+            system-configuration
+            echo ""
+            ;;
+        9)
+            echo
+            system-setup
+            echo ""
+            ;;
+        0)
+            clear && exit
+            read
+            ;;
+        *)
+            echo -e "$RED Wrong option $NC"
+            echo "Wait and try again later..."
+            echo ""
+            sleep 3
+            clear
+            ;;
+    esac
+    done
+fi
