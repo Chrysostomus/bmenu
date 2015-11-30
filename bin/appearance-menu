@@ -1,1 +1,254 @@
 #!/bin/bash
+
+RED='\e[41m'
+BLUE='\e[44m'
+ORANGE='\e[46m'
+NC='\e[0m'
+
+function set_gtk2_theme {
+	new_theme="$@"
+	cp .gtkrc-2.0 .gtkrc-2.0.bak && sed -i "s/$(grep "gtk-theme-name" .gtkrc-2.0)/gtk-theme-name=\"$new_theme\"/g" .gtkrc-2.0
+}
+function choose_gtk2_theme {
+PS3="Choose new gtk2 theme: "
+# Gather the results in an array.
+gtk2_themes=($(find /usr/share/themes -type d -name "gtk-2.0" | awk -F'/' '{print $5}') "proceed" "cancel")
+
+select pick in "${gtk2_themes[@]}"
+do
+	case $pick in
+		proceed)
+			break
+			;;
+		cancel)
+			exit
+			;;		
+		*)	
+			picks+=("$pick")
+			break
+			;;		
+	esac
+done
+
+if [[ $picks ]]; then
+    printf 'Setting theme to %s\n' "${picks[*]}"
+    set_gtk2_theme "${picks[@]}"
+    picks=()
+fi
+}
+
+function set_gtk3_theme {
+	new_theme="$@"
+	cp .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-theme-name" .config/gtk-3.0/settings.ini)/gtk-theme-name=$new_theme/g" .config/gtk-3.0/settings.ini
+}
+
+function choose_gtk3_theme {
+PS3="Choose new gtk3 theme: "
+# Gather the results in an array.
+gtk3_themes=($(find /usr/share/themes -type d -name "gtk-3.0" | awk -F'/' '{print $5}') "proceed" "cancel")
+
+select pick in "${gtk3_themes[@]}"
+do
+	case $pick in
+		proceed)
+			break
+			;;
+		cancel)
+			exit
+			;;		
+		*)	
+			picks+=("$pick")
+			break
+			;;		
+	esac
+done
+
+if [[ $picks ]]; then
+    printf 'Setting theme to %s\n' "${picks[*]}"
+    set_gtk3_theme "${picks[@]}"
+    picks=()
+fi
+}
+
+function set_icon_theme {
+	new_theme="$@"
+	cp .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-icon-theme-name" .config/gtk-3.0/settings.ini)/gtk-icon-theme-name=$new_theme/g" .config/gtk-3.0/settings.ini
+	cp .gtkrc-2.0 .gtkrc-2.0.bak && sed -i "s/$(grep "gtk-icon-theme-name" .gtkrc-2.0)/gtk-icon-theme-name=\"$new_theme\"/g" .gtkrc-2.0	
+}
+
+function choose_icon_theme {
+PS3="Choose new icon theme: "
+# Gather the results in an array.
+icon_themes=($(find /usr/share/icons -type f -name "index.theme" | awk -F'/' '{print $5}') "proceed" "cancel")
+
+select pick in "${icon_themes[@]}"
+do
+	case $pick in
+		proceed)
+			break
+			;;
+		cancel)
+			exit
+			;;		
+		*)	
+			picks+=("$pick")
+			break
+			;;		
+	esac
+done
+
+if [[ $picks ]]; then
+    printf 'Setting theme to %s\n' "${picks[*]}"
+    set_icon_theme "${picks[@]}"
+    picks=()
+fi
+}
+
+function set_pointer_theme {
+	new_theme="$@"
+	cp .icons/default/index.theme .icons/default/index.theme.bak && sed -i "s/$(grep "Inherits" .icons/default/index.theme)/Inherits=$new_theme/g" .icons/default/index.theme
+	cp .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-cursor-theme-name" .config/gtk-3.0/settings.ini)/gtk-cursor-theme-name=$new_theme/g" .config/gtk-3.0/settings.ini
+	cp .gtkrc-2.0 .gtkrc-2.0.bak && sed -i "s/$(grep "gtk-cursor-theme-name" .gtkrc-2.0)/gtk-cursor-theme-name=\"$new_theme\"/g" .gtkrc-2.0
+}
+
+function choose_pointer_theme {
+PS3="Choose new pointer theme: "
+# Gather the results in an array.
+pointer_themes=($(find /usr/share/icons -type d -name "cursors" | awk -F'/' '{print $5}' | sed 's/-Cursor//g') "proceed" "cancel")
+
+select pick in "${pointer_themes[@]}"
+do
+	case $pick in
+		proceed)
+			break
+			;;
+		cancel)
+			exit
+			;;		
+		*)	
+			picks+=("$pick")
+			break
+			;;		
+	esac
+done
+
+if [[ $picks ]]; then
+    printf 'Setting theme to %s\n' "${picks[*]}"
+    set_pointer_theme "${picks[@]}"
+    picks=()
+fi
+}
+
+function set_font {
+	new_theme="$@"
+	cp .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-font-name" .config/gtk-3.0/settings.ini)/gtk-font-name=$new_theme/g" .config/gtk-3.0/settings.ini
+	cp .gtkrc-2.0 .gtkrc-2.0.bak && sed -i "s/$(grep "gtk-font-name" .gtkrc-2.0)/gtk-font-name=\"$new_theme\"/g" .gtkrc-2.0	
+}
+
+function choose_font {
+new_font=$(fc-list : family | pmenu -p "< Choose new font to use >")
+
+eval $new_font
+echo "  Input the size of the font"
+read font_size
+
+set_font $new_font $font_size
+}
+function toggle_dark_theme {
+	grep -q "gtk-application-prefer-dark-theme=1" .config/gtk-3.0/settings.ini && \
+	sed -i "s/gtk-application-prefer-dark-theme=1/gtk-application-prefer-dark-theme=0/g" .config/gtk-3.0/settings.ini || \
+	sed -i "s/gtk-application-prefer-dark-theme=0/gtk-application-prefer-dark-theme=1/g" .config/gtk-3.0/settings.ini
+}
+
+function main {
+    while true; do
+    clear
+    echo ""
+    echo -e "                             $NC ::Appearance:: $NC "
+    echo ""
+    echo -e ""
+    echo -e " ┌────────────────────────────────────────────────────────────────────────────┐"
+    echo -e " │  $NC  1 $NC  Set gtk2 theme                      $NC  2 $NC  Set gtk3 theme            │"
+    echo -e " │  $NC  3 $NC  Set font                            $NC  4 $NC  Set icon theme            │"
+    echo -e " │  $NC  5 $NC  Toggle dark theme                   $NC  6 $NC  Set pointer theme         │"    
+    echo -e " │  $NC  7 $NC  Edit gtk2 settings                  $NC  8 $NC  Edit gtk3 settings        │"    
+
+    echo " └────────────────────────────────────────────────────────────────────────────┘"
+        echo -e "    $NC Select a number and press [Enter]$NC $NC - 0 Exit mhwd-tui$NC"
+    echo ""
+    read -s -n1 choix
+    case $choix in
+        1)
+            echo
+            choose_gtk2_theme
+            echo ""
+            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
+            read
+            ;;
+        2)
+            echo
+            choose_gtk3_theme
+            echo ""
+            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
+            read
+            ;;
+        3)
+            echo
+            choose_font
+            echo ""
+            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
+            read
+            ;;
+        4)
+            echo
+            choose_icon_theme
+            echo ""
+            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
+            read
+            ;;
+        5)
+            echo
+            toggle_dark_theme
+            echo ""
+            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
+            read
+            ;;
+        6)
+            echo
+            choose_pointer_theme
+            echo ""
+            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
+            read
+            ;;
+        7)
+            echo
+            nano .gtkrc-2.0
+            echo ""
+            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
+            read
+            ;;
+        8)
+            echo
+            nano .config/gtk-3.0/settings.ini
+            echo ""
+            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
+            read
+            ;;
+
+
+        0)
+            clear && exit
+            read
+            ;;
+        *)
+            echo -e "$RED Unknown option $NC"
+            echo "Wait and try again later..."
+            echo ""
+            sleep 3
+            clear
+            ;;
+    esac
+    done
+}
+
+main
