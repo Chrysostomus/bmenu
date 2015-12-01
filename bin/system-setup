@@ -1,11 +1,97 @@
+#!/bin/bash
 
-Choose bootloader
-Choose displaymanager
-Choose shell (choose between fish, bash, zsh and dash)
-Install wine printer support, 
-Install pipelight
-Install widevine, 
-Install Aur support
-Enable hibernation support (hibernator)
-Enable autologin
-Enable delayed hibernation
+RED='\e[41m'
+BLUE='\e[44m'
+ORANGE='\e[46m'
+NC='\e[0m'
+function shell_chooser {
+
+}
+function displaymanager {
+
+}
+
+function hibernation_setup {
+
+}
+function bootloader_choice {
+
+}
+
+function autologger {
+
+}
+    while true; do
+    clear
+    echo ""
+    echo -e "                       ::Setup::  "
+    echo -e " ┌─────────────────────────────────────────────────────────────┐"
+    echo -e " │    1   Enable hibernation        2   Choose Display manager │"
+    echo -e " │    3   Enable autologin          4   Install AUR support    │"
+    echo -e " │    5   Choose shell              6   Choose bootloader      │"    
+    echo -e " │    7   Install printer support   8   Configuration          │"
+    echo -e " │    9   Setup                     0   Exit                   │"
+    echo -e " └─────────────────────────────────────────────────────────────┘"
+    echo -e "              Select a number and press [Enter]"
+    echo ""
+    read -s -n1 choix
+    case $choix in
+        1)
+            echo
+            hibernation_setup
+            echo ""
+            ;;
+        2)
+            echo
+            displaymanager
+            echo ""
+            ;;
+        3)
+            echo
+            autologger
+            echo ""
+            ;;
+        4)
+            echo
+            sudo pacman -Syu base-devel yaourt
+            echo ""
+            ;;
+        5)
+            echo
+            shell_chooser
+            echo ""
+            ;;
+        6)
+            echo
+            bootloader_choice
+            echo ""
+            ;;
+        7)
+            echo
+            sudo pacman -Syu manjaro-printers
+            echo ""
+            ;;
+        8)
+            echo
+            system-configuration
+            echo ""
+            ;;
+        9)
+            echo
+            system-setup
+            echo ""
+            ;;
+        0)
+            clear && exit
+            read
+            ;;
+        *)
+            echo -e "$RED Wrong option $NC"
+            echo "Wait and try again later..."
+            echo ""
+            sleep 3
+            clear
+            ;;
+    esac
+    done
+fi
