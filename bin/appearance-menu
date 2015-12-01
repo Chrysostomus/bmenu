@@ -164,17 +164,15 @@ function main {
     while true; do
     clear
     echo ""
-    echo -e "                             $NC ::Appearance:: $NC "
-    echo ""
-    echo -e ""
-    echo -e " ┌────────────────────────────────────────────────────────────────────────────┐"
-    echo -e " │  $NC  1 $NC  Set gtk2 theme                      $NC  2 $NC  Set gtk3 theme            │"
-    echo -e " │  $NC  3 $NC  Set font                            $NC  4 $NC  Set icon theme            │"
-    echo -e " │  $NC  5 $NC  Toggle dark theme                   $NC  6 $NC  Set pointer theme         │"    
-    echo -e " │  $NC  7 $NC  Edit gtk2 settings                  $NC  8 $NC  Edit gtk3 settings        │"    
-
-    echo " └────────────────────────────────────────────────────────────────────────────┘"
-        echo -e "    $NC Select a number and press [Enter]$NC $NC - 0 Exit mhwd-tui$NC"
+    echo -e "                              ::Appearance::  "
+    echo -e " ┌────────────────────────────────────────────────────────────────┐"
+    echo -e " │    1   Set gtk2 theme               2   Set gtk3 theme         │"
+    echo -e " │    3   Set font                     4   Set icon theme         │"
+    echo -e " │    5   Toggle dark theme            6   Set pointer theme      │"    
+    echo -e " │    7   Edit gtk2 settings           8   Edit gtk3 settings     │" 
+    echo -e " │    9   Edit Xresources              0   Exit                   │"   
+    echo -e " └────────────────────────────────────────────────────────────────┘"
+        echo -e "             Select a number and press [Enter] "
     echo ""
     read -s -n1 choix
     case $choix in
@@ -182,60 +180,47 @@ function main {
             echo
             choose_gtk2_theme
             echo ""
-            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
-            read
             ;;
         2)
             echo
             choose_gtk3_theme
             echo ""
-            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
-            read
             ;;
         3)
             echo
             choose_font
             echo ""
-            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
-            read
             ;;
         4)
             echo
             choose_icon_theme
             echo ""
-            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
-            read
             ;;
         5)
             echo
             toggle_dark_theme
             echo ""
-            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
-            read
             ;;
         6)
             echo
             choose_pointer_theme
             echo ""
-            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
-            read
             ;;
         7)
             echo
-            nano .gtkrc-2.0
+            $EDITOR .gtkrc-2.0
             echo ""
-            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
-            read
             ;;
         8)
             echo
-            nano .config/gtk-3.0/settings.ini
+            $EDITOR .config/gtk-3.0/settings.ini
             echo ""
-            echo -e "$NC Operation complete. To return to appearance menu press [Enter] $NC"
-            read
             ;;
-
-
+        9)
+            echo
+            $EDITOR .Xresources
+            echo ""
+            ;;
         0)
             clear && exit
             read
