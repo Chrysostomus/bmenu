@@ -1,0 +1,80 @@
+#!/bin/bash
+
+RED='\e[41m'
+BLUE='\e[44m'
+ORANGE='\e[46m'
+NC='\e[0m'
+    while true; do
+    clear
+    echo ""
+    echo -e "                       ::Printers::  "
+    echo -e " ┌─────────────────────────────────────────────────────────────┐"
+    echo -e " │    1   Hardware                     2   Display             │"
+    echo -e " │    3   Printers                     4   Appearance          │"
+    echo -e " │    5   Package manager              6   Network             │"    
+    echo -e " │    7   Sound                        8   Configuration       │"
+    echo -e " │    9   Setup                        0   Exit                │"
+    echo -e " └─────────────────────────────────────────────────────────────┘"
+        echo -e "              Select a number and press [Enter]"
+    echo ""
+    read -s -n1 choix
+    case $choix in
+        1)
+            echo
+            mhwd-tui
+            echo ""
+            ;;
+        2)
+            echo
+            brandr
+            echo ""
+            ;;
+        3)
+            echo
+            bcups
+            echo ""
+            ;;
+        4)
+            echo
+            appearance-menu
+            echo ""
+            ;;
+        5)
+            echo
+            pacli
+            echo ""
+            ;;
+        6)
+            echo
+            $netcommand
+            echo ""
+            ;;
+        7)
+            echo
+            alsamixer
+            echo ""
+            ;;
+        8)
+            echo
+            system-configuration
+            echo ""
+            ;;
+        9)
+            echo
+            system-setup
+            echo ""
+            ;;
+        0)
+            clear && exit
+            read
+            ;;
+        *)
+            echo -e "$RED Wrong option $NC"
+            echo "Wait and try again later..."
+            echo ""
+            sleep 3
+            clear
+            ;;
+    esac
+    done
+fi
