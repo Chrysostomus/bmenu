@@ -1,8 +1,81 @@
 #!/bin/bash
-Edit 
-- fstab
-- pacman.conf
-- logind.conf
-- bootloader configs
-- mkinitcpio
-- 
+
+RED='\e[41m'
+BLUE='\e[44m'
+ORANGE='\e[46m'
+NC='\e[0m'
+
+    while true; do
+    clear
+    echo ""
+    echo -e "                       ::Settings::  "
+    echo -e " ┌─────────────────────────────────────────────────────────────┐"
+    echo -e " │    1   Pacman settings              2   Mkinitcpio          │"
+    echo -e " │    3   Fstab                        4   Sudoers             │"
+    echo -e " │    5   Logind                       6   Bootloader          │"    
+    echo -e " │    7   Udevil settings              8   Xinitrc             │"
+    echo -e " │    9   Setup                        0   Exit                │"
+    echo -e " └─────────────────────────────────────────────────────────────┘"
+        echo -e "              Select a number and press [Enter]"
+    echo ""
+    read -s -n1 choix
+    case $choix in
+        1)
+            echo
+            sudo $EDITOR /etc/pacman.conf
+            echo ""
+            ;;
+        2)
+            echo
+            sudo $EDITOR /etc/mkinitcpio.conf
+            echo ""
+            ;;
+        3)
+            echo
+            sudo $EDITOR /etc/fstab
+            echo ""
+            ;;
+        4)
+            echo
+            sudo visudo
+            echo ""
+            ;;
+        5)
+            echo
+            sudo $EDITOR /etc/logind.conf
+            echo ""
+            ;;
+        6)
+            echo
+            sudo $EDITOR $bootloaderconfig
+            echo ""
+            ;;
+        7)
+            echo
+            sudo $EDITOR /etc/udevil.udevil.conf
+            echo ""
+            ;;
+        8)
+            echo
+            $EDITOR ~/.xinitrc
+            echo ""
+            ;;
+        9)
+            echo
+            system-setup
+            echo ""
+            ;;
+        0)
+            clear && exit
+            read
+            ;;
+        *)
+            echo -e "$RED Wrong option $NC"
+            echo "Wait and try again later..."
+            echo ""
+            sleep 3
+            clear
+            ;;
+    esac
+    done
+fi
