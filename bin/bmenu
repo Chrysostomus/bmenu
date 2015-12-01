@@ -6,18 +6,22 @@ ORANGE='\e[46m'
 NC='\e[0m'
 systemctl status NetworkManager.service | grep -q " active " && netcommand="nmtui"
 systemctl status Netctl.service | grep -q " active " && netcommand="sudo wifi-menu"
+
+function cli_filemanager {
+mc || ranger
+}
     while true; do
     clear
     echo ""
-    echo -e "                       $NC ::Main menu:: $NC "
+    echo -e "                       ::Main menu::  "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
-    echo -e " │  $NC  1 $NC  Hardware                   $NC  2 $NC  Display             │"
-    echo -e " │  $NC  3 $NC  Printers                   $NC  4 $NC  Appearance          │"
-    echo -e " │  $NC  5 $NC  Package manager            $NC  6 $NC  Network             │"    
-    echo -e " │  $NC  7 $NC  Sound                      $NC  8 $NC  Configuration       │"
-    echo -e " │  $NC  9 $NC  Setup                      $NC  0 $NC  Exit                │"
-    echo " └─────────────────────────────────────────────────────────────┘"
-        echo -e "             $NC Select a number and press [Enter]$NC"
+    echo -e " │    1   Hardware                     2   Display             │"
+    echo -e " │    3   Printers                     4   Appearance          │"
+    echo -e " │    5   Package manager              6   Network             │"    
+    echo -e " │    7   Sound                        8   Configuration       │"
+    echo -e " │    9   File Manager                 0   Exit                │"
+    echo -e " └─────────────────────────────────────────────────────────────┘"
+        echo -e "              Select a number and press [Enter]"
     echo ""
     read -s -n1 choix
     case $choix in
@@ -58,12 +62,12 @@ systemctl status Netctl.service | grep -q " active " && netcommand="sudo wifi-me
             ;;
         8)
             echo
-            system-configuration
+            system-settings
             echo ""
             ;;
         9)
             echo
-            system-setup
+            cli_filemanager
             echo ""
             ;;
         0)
