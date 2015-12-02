@@ -4,6 +4,11 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
+[[  $BROWSER && ${BROWSER-x} ]] && browser=$BROWSER || browser='firefox'
+function webinterface {
+$BROWSER http://localhost:631
+}
+function main {
     while true; do
     clear
     echo ""
@@ -13,7 +18,7 @@ NC='\e[0m'
     echo -e " │    3   Web interface                4   Add scanner         │"
     echo -e " │    5   Print                        6   Scan                │"    
     echo -e " └─────────────────────────────────────────────────────────────┘"
-        echo -e "              Select a number and press [Enter] - 0   Exit"
+    echo -e "              Select a number and press [Enter] - 0   Exit"
     echo ""
     read -s -n1 choix
     case $choix in
@@ -29,7 +34,7 @@ NC='\e[0m'
             ;;
         3)
             echo
-            $BROWSER http://localhost:631
+            webinterface
             echo ""
             ;;
         4)
@@ -76,3 +81,6 @@ NC='\e[0m'
     esac
     done
 fi
+}
+
+webinterface
