@@ -126,11 +126,11 @@ function bootloader_choice {
 echo placeholder
 }
 
-#function dm_detect {
-#	for displaymanager in kdm gdm sddm lightdm lxdm slim do;
-#	systemctl status $displaymanager.service | grep -q enabled && echo $displaymanager
-#	done
-#}
+function dm_detect {
+	for displaymanager in kdm gdm sddm lightdm lxdm slim; do
+	systemctl status $displaymanager.service | grep -q enabled && echo $displaymanager
+	done
+}
 
 function choose_session {
 PS3="Which session do you wish to use as default? "
@@ -202,6 +202,7 @@ function autologger {
 			break
 			;;		
 		*)
+			sudo pacman -Syu xlogin && sudo systemctl enable xlogin@$(whoami)
 			;;
 	esac
 }
