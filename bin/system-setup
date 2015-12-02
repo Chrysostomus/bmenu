@@ -108,7 +108,18 @@ done
 }
 
 function hibernation_setup {
-	hibernator
+	sudo hibernator
+	echo "Enable delayed hibernation service? (y/n)"
+	read -s -n1 choix
+    case $choix in
+	    y)
+    	sudo pacman -Syu delayed-hibernation
+    	break
+    	;;
+    	*)
+    	break
+    	;; 
+esac
 }
 
 function bootloader_choice {
@@ -268,4 +279,3 @@ function autologger {
             ;;
     esac
     done
-fi
