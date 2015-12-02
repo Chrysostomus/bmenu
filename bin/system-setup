@@ -5,22 +5,196 @@ BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
 function shell_chooser {
+PS3="Which shell do you wish to use as default? "
+# Gather the results in an array.
+shells=("zsh" "bash" "fish" "dash" "cancel")
 
+select pick in "${shells[@]}"
+do
+	case $pick in
+		zsh)
+			echo ""
+			echo "Z shell. Advanced and versatile shell with supreme configuration options and tab completion. Master of all trades, jack of none, but really needs configuration."
+			echo ""
+			echo ""
+			sudo pacman -Syu zsh zsh-completions command-not-found
+			echo ""
+			echo ""
+			echo "check oh-my-zsh or builtin configuration tool for configurations"
+			echo "you migh also like zsh-history-substring search or zsh-syntax-highlighting"
+			echo ""
+			echo ""
+			chsh -s /usr/bin/zsh
+			break
+			;;		
+		bash)
+			echo ""
+			echo ""
+			echo "Bourne again shell. Standard for most linux systems. Respectable choice for any use. Jack of all trades, master of none."
+			echo ""
+			echo ""
+			sudo pacman -Syu bash bash-completion command-not-found
+			echo ""
+			chsh -s /bin/bash
+			break
+			;;		
+		fish)
+			echo ""
+			echo ""
+			echo "Friendly interactive shell. Bad for scripting, great for interactive use without much configuration required."
+			echo ""
+			echo ""
+			sudo pacman -Syu fish command-not-found
+			chsh -s /usr/bin/fish
+			echo ""
+			break
+			;;		
+		dash)
+			echo ""
+			echo ""
+			echo "Debian almquist shell. Super light and feature free. Great for scripting and fast startup, entirely unsuitable for interactive use."
+			sudo pacman -Syu dash
+			chsh -s /usr/dash
+			break
+			;;		
+		cancel)
+			break
+	esac
+done
 }
-function displaymanager {
 
+function displaymanager {
+PS3="Which displaymanager do you wish to use? "
+# Gather the results in an array.
+dms=("lightdm" "kdm" "gdm" "lxdm" "mdm" "slim" "sddm" "cancel")
+
+select pick in "${dms[@]}"
+do
+	case $pick in
+		slim)
+			sudo pacman -Sy slim slim-themes && sudo systemctl enable slim.service -f
+			break
+			;;		
+		lightdm)
+			sudo pacman -Sy lightdm lightdm-another-gtk-greeter lightdm-another-gtk-greeter-themes accountsservice \
+			&& sudo systemctl enable lightdm.service -f && sudo systemctl enable accounts-daemon && \
+			sudo nano /etc/lightdm/lightdm.conf
+			break
+			;;		
+		sddm)
+			sudo pacman -Sy sddm && sudo systemctl enable sddm.service -f
+			break
+			;;		
+		mdm)
+			sudo pacman -Sy mdm && sudo systemctl enable mdm.service -f
+			break
+			;;		
+		lxdm)
+			sudo pacman -Sy lxdm && sudo systemctl enable lxdm.service -f
+			break
+			;;		
+		gdm)
+			sudo pacman -Sy gdm3setup && sudo systemctl enable gdm.service -f
+			break
+			;;		
+		kdm)
+			sudo pacman -Sy kdebase-workspace archlinux-themes-kdm && sudo systemctl enable kdm.service -f
+			break
+			;;		
+		cancel)
+			break
+	esac
+done
 }
 
 function hibernation_setup {
-
+	hibernator
 }
-function bootloader_choice {
 
+function bootloader_choice {
+echo placeholder
+}
+
+#function dm_detect {
+#	for displaymanager in kdm gdm sddm lightdm lxdm slim do;
+#	systemctl status $displaymanager.service | grep -q enabled && echo $displaymanager
+#	done
+#}
+
+function choose_session {
+PS3="Which session do you wish to use as default? "
+# Gather the results in an array.
+session=($(ls /usr/share/xsessions/) "cancel")
+
+select pick in "${dms[@]}"
+do
+	case $pick in
+		*)
+			echo $pick
+			break
+			;;			
+		cancel)
+			break
+	esac
+done
 }
 
 function autologger {
-
+	dm=$(dm_detect)
+	session=$(choose_session)
+	eval user=$(whoami)
+	case dm in 
+			slim)
+			sudo sed -i '/autologin/s/^#//g' /etc/slim.conf && sudo sed -i '/defaultuser/s/^#//g' /etc/slim.conf
+			sudo sed -i "s/simone/$user/g" /etc/slim.conf
+			break
+			;;		
+		lightdm)
+			sudo sed -i "s/^autologin-user=*/autologin-user=$user/g" /etc/lightdm.conf
+			sudo sed -i 's/^autologin-user-timeout=*/autologin-user-timeout=0/g' /etc/lightdm.conf
+			sudo groupadd -r autologin
+			sudo gpasswd -a $user autologin						
+			sudo nano /etc/lightdm.conf
+			break
+			;;		
+		sddm)
+			sudo sddm --example-config > /etc/sddm.conf
+			sudo sed -i "s/^User=/User=$user/g" /etc/sddm.conf
+			sudo sed -i "s/^Session/Session=$session/g" /etc/slim.conf
+			break
+			;;		
+		mdm)
+			sudo sed -i "s/^AutomaticLogin=*/AutomaticLogin=$user/g" /etc/mdm.conf
+			sudo sed -i 's/^AutomaticLoginEnable=*/AutomaticLoginEnable=true/g' /etc/mdm.conf
+			sudo sed -i 's/^TimedLoginEnable=*/TimedLoginEnable=true/g' /etc/mdm.conf
+			sudo sed -i 's/^TimedLogin=*/TimedLoginEnable=$user/g' /etc/mdm.conf
+			sudo sed -i 's/^TimedLoginDelay=*/TimedLoginDelay=0/g' /etc/mdm.conf
+			sudo nano /etc/mdm/mdm.conf
+			break
+			;;		
+		lxdm)
+			sudo sed -i "1s/^/autologin=$user /" /etc/lxdm/lxdm.conf
+			sudo nano /etc/lxdm/lxdm.conf
+			break
+			;;		
+		gdm)
+			sudo sed -i "s/^AutomaticLogin=*/AutomaticLogin=$user/g" /etc/gdm/custom.conf
+			sudo sed -i 's/^AutomaticLoginEnable=*/AutomaticLoginEnable=true/g' /etc/gdm/custom.conf
+			sudo sed -i 's/^TimedLoginEnable=*/TimedLoginEnable=true/g' /etc/gdm/custom.conf
+			sudo sed -i 's/^TimedLogin=*/TimedLoginEnable=$user/g' /etc/gdm/custom.conf
+			sudo sed -i 's/^TimedLoginDelay=*/TimedLoginDelay=0/g' /etc/gdm/custom.conf
+			break
+			;;		
+		kdm)
+			sudo sed -i "s/^AutoLoginUser=*/AutoLoginUser=$user/g" /usr/kde/*/share/config/kdm/kdmrc
+			sudo sed -i "s/^AutoLoginEnable=*/AutoLoginEnable=true/g" /usr/kde/*/share/config/kdm/kdmrc
+			break
+			;;		
+		*)
+			;;
+	esac
 }
+
     while true; do
     clear
     echo ""
