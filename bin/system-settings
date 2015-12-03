@@ -4,6 +4,37 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
+function bootloader_configuration {
+PS3="Select bootloader to configure: "
+# Gather the results in an array.
+dms=("grub" "refind" "systemdboot" "syslinux")
+
+select pick in "${dms[@]}"
+do
+	case $pick in
+		grub)
+			sudo nano /etc/default/grub
+			sudo update-grub
+			break
+			;;		
+		refind)
+			sudo nano /boot/refind_linux.conf
+			sudo nano /boot/EFI/refind/refind.conf
+			break
+			;;		
+		systemdboot)
+			sudo nano /boot/loader/entries/manjaro.conf
+			break
+			;;		
+		syslinux)
+			sudo nano /boot/syslinux/syslinux.cfg
+			break
+			;;		
+		cancel)
+			break
+	esac
+done
+}
 
     while true; do
     clear
@@ -22,17 +53,17 @@ NC='\e[0m'
     case $choix in
         1)
             echo
-            sudo $EDITOR /etc/pacman.conf
+            sudo nano /etc/pacman.conf
             echo ""
             ;;
         2)
             echo
-            sudo $EDITOR /etc/mkinitcpio.conf
+            sudo nano /etc/mkinitcpio.conf
             echo ""
             ;;
         3)
             echo
-            sudo $EDITOR /etc/fstab
+            sudo nano /etc/fstab
             echo ""
             ;;
         4)
@@ -42,22 +73,22 @@ NC='\e[0m'
             ;;
         5)
             echo
-            sudo $EDITOR /etc/logind.conf
+            sudo nano /etc/systemd/logind.conf
             echo ""
             ;;
         6)
             echo
-            sudo $EDITOR $bootloaderconfig
+            bootloader_configuration
             echo ""
             ;;
         7)
             echo
-            sudo $EDITOR /etc/udevil.udevil.conf
+            sudo nano /etc/udevil/udevil.conf
             echo ""
             ;;
         8)
             echo
-            $EDITOR ~/.xinitrc
+            nano ~/.xinitrc
             echo ""
             ;;
         9)
