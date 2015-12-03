@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 RED='\e[41m'
@@ -107,6 +108,45 @@ do
 done
 }
 
+function disk_utilities {
+PS3="Select tool to use? "
+# Gather the results in an array.
+dms=("cfdisk" "cgdisk" "gdisk" "parted" "gparted" "gnome-disks")
+
+select pick in "${dms[@]}"
+do
+	case $pick in
+		cfdisk)
+			sudo cfdisk
+			break
+			;;		
+		cgdisk)
+			sudo cgdisk
+			break
+			;;		
+		gdisk)
+			sudo gdisk
+			break
+			;;		
+		parted)
+			sudo parted
+			break
+			;;		
+		gparted)
+			sudo gparted
+			break
+			;;		
+		gnome-disks)
+			sudo gnome-disks
+			break
+			;;		
+		cancel)
+			break
+	esac
+done
+}
+
+
 function hibernation_setup {
 	sudo hibernator
 	echo "Enable delayed hibernation service? (y/n)"
@@ -122,8 +162,36 @@ function hibernation_setup {
 esac
 }
 
-function bootloader_choice {
-	echo "coming soon..." && sleep 4s
+function bootloader_configuration {
+PS3="Select bootloader to configure: "
+# Gather the results in an array.
+dms=("grub" "refind" "systemdboot" "syslinux")
+
+select pick in "${dms[@]}"
+do
+	case $pick in
+		grub)
+			sudo nano /etc/default/grub
+			sudo update-grub
+			break
+			;;		
+		refind)
+			sudo nano /boot/refind_linux.conf
+			sudo nano /boot/EFI/refind/refind.conf
+			break
+			;;		
+		systemdboot)
+			sudo nano /boot/loader/entries/manjaro.conf
+			break
+			;;		
+		syslinux)
+			sudo nano /boot/syslinux/syslinux.cfg
+			break
+			;;		
+		cancel)
+			break
+	esac
+done
 }
 
 function dm_detect {
@@ -249,7 +317,7 @@ function autologger {
             ;;
         6)
             echo
-            bootloader_choice
+            bootloader_configuration
             echo ""
             ;;
         7)
@@ -259,12 +327,12 @@ function autologger {
             ;;
         8)
             echo
-            system-configuration
+            photorec
             echo ""
             ;;
         9)
             echo
-            system-setup
+            disk_utils
             echo ""
             ;;
         0)
