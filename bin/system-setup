@@ -111,9 +111,9 @@ done
 function disk_utilities {
 PS3="Select tool to use? "
 # Gather the results in an array.
-dms=("cfdisk" "cgdisk" "gdisk" "parted" "gparted" "gnome-disks")
+tools=("cfdisk" "cgdisk" "gdisk" "parted" "gparted" "gnome-disks")
 
-select pick in "${dms[@]}"
+select pick in "${tools[@]}"
 do
 	case $pick in
 		cfdisk)
@@ -146,7 +146,6 @@ do
 done
 }
 
-
 function hibernation_setup {
 	sudo hibernator
 	echo "Enable delayed hibernation service? (y/n)"
@@ -160,38 +159,6 @@ function hibernation_setup {
     	break
     	;; 
 esac
-}
-
-function bootloader_configuration {
-PS3="Select bootloader to configure: "
-# Gather the results in an array.
-dms=("grub" "refind" "systemdboot" "syslinux")
-
-select pick in "${dms[@]}"
-do
-	case $pick in
-		grub)
-			sudo nano /etc/default/grub
-			sudo update-grub
-			break
-			;;		
-		refind)
-			sudo nano /boot/refind_linux.conf
-			sudo nano /boot/EFI/refind/refind.conf
-			break
-			;;		
-		systemdboot)
-			sudo nano /boot/loader/entries/manjaro.conf
-			break
-			;;		
-		syslinux)
-			sudo nano /boot/syslinux/syslinux.cfg
-			break
-			;;		
-		cancel)
-			break
-	esac
-done
 }
 
 function dm_detect {
@@ -282,9 +249,9 @@ function autologger {
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
     echo -e " │    1   Enable hibernation        2   Choose Display manager │"
     echo -e " │    3   Enable autologin          4   Install AUR support    │"
-    echo -e " │    5   Choose shell              6   Configure bootloader   │"    
+    echo -e " │    5   Choose shell              6   Disk utility 		    │"    
     echo -e " │    7   Install printer support   8   Recover files          │"
-    echo -e " │    9   Disk utility              0   Exit                   │"
+    echo -e " │    0   Exit                                                 │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
     echo -e "              Select a number and press [Enter]"
     echo ""
@@ -317,7 +284,7 @@ function autologger {
             ;;
         6)
             echo
-            bootloader_configuration
+            disk_utils
             echo ""
             ;;
         7)
