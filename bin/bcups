@@ -4,8 +4,8 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
-[[  $BROWSER && ${BROWSER-x} ]] && browser=$BROWSER || browser='elinks'
+browser='elinks'
 function webinterface {
-$BROWSER http://localhost:631
+  $browser http://localhost:631
 }
 webinterface
