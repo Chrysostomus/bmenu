@@ -8,7 +8,13 @@ systemctl status NetworkManager.service | grep -q " active " && netcommand="nmtu
 systemctl status Netctl.service | grep -q " active " && netcommand="sudo wifi-menu"
 
 function cli_filemanager {
-mc || ranger
+	if [ -e /usr/bin/ranger ]; then
+		ranger
+	elif [ -e /usr/bin/mc ]; then
+		mc
+	else
+		sudo pacman -Sy ranger && ranger
+	fi
 }
     while true; do
     clear
@@ -21,7 +27,7 @@ mc || ranger
     echo -e " │    7   Sound                        8   Configuration       │"
     echo -e " │    9   File Manager                 0   Exit                │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
-        echo -e "              Select a number and press [Enter]"
+    echo -e "              Select a number and press [Enter]"
     echo ""
     read -s -n1 choix
     case $choix in
