@@ -248,7 +248,7 @@ function autologger {
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
     echo -e " │    1   Enable hibernation        2   Choose Display manager │"
     echo -e " │    3   Enable autologin          4   Install AUR support    │"
-    echo -e " │    5   Choose shell              6   Disk utility 	        │"    
+    echo -e " │    5   Choose shell              6   Disk utility           │"    
     echo -e " │    7   Install printer support   8   Recover files          │"
     echo -e " │    0   Exit                                                 │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
