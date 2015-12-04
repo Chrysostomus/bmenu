@@ -25,9 +25,9 @@ function cli_filemanager {
     echo -e " │    3   Printers                     4   Appearance          │"
     echo -e " │    5   Package manager              6   Network             │"    
     echo -e " │    7   Sound                        8   Configuration       │"
-    echo -e " │    9   File Manager                 0   Exit                │"
+    echo -e " │    9   File Manager                 T   Taskmanager         │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
-    echo -e "              Select a number and press [Enter]"
+    echo -e "        Select a number       -        0   Exit "
     echo ""
     read -s -n1 choix
     case $choix in
@@ -74,6 +74,11 @@ function cli_filemanager {
         9)
             echo
             cli_filemanager
+            echo ""
+            ;;
+        t|T)
+            echo
+            htop
             echo ""
             ;;
         0)
