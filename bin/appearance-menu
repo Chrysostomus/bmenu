@@ -146,7 +146,7 @@ function set_font {
 }
 
 function choose_font {
-new_font=$(fc-list : family | pmenu -p "< Choose new font to use >")
+new_font=$(fc-list : family | fzf --prompt="< Choose new font to use >")
 
 eval $new_font
 echo "  Input the size of the font"
