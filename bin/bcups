@@ -37,7 +37,8 @@ function set_default_scanner {
   default_scan=$(scanimage -L 2> /dev/null | \
   fzf -e --reverse --prompt='Searching for scanners... Select new default >' | \
   awk '{print $2} {print substr($2, 2, length($2) - 2)}')
-  echo SCANNER=$default_scan > $HOME/.sanedefault
+  echo "export SANE_DEFAULT_DEVICE=$(default_scan)" >> $HOME/.profile
+  SANE_DEFAULT_DEVICE=$(default_scan)
 }
 
 function select_filetype {
