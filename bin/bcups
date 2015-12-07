@@ -7,7 +7,7 @@ NC='\e[0m'
 browser='elinks'
 printers=$(lpstat -p -d | awk '/printer/ {print $2}')
 enabled_printers=$(lpstat -p -d | awk '/enabled/ {print $2}')
-
+    
 function webinterface {
   $browser http://localhost:631
 }
@@ -29,30 +29,59 @@ function print_file {
   sleep 3
 }
 
+function select_scanner {
+  scanimage -L 2> /dev/null | fzf -e --reverse --prompt='Searching for scanners... Select one >' | awk '{print substr($2, 2, length($2) - 2)}'
+}
+
 function set_default_scanner {
-  $browser http://localhost:631
+  default_scan=$(scanimage -L 2> /dev/null | \
+  fzf -e --reverse --prompt='Searching for scanners... Select new default >' | \
+  awk '{print $2} {print substr($2, 2, length($2) - 2)}')
+  echo SCANNER=$default_scan > $HOME/.sanedefault
+}
+
+function select_filetype {
+PS3="Which filetype should be used? "
+# Gather the results in an array.
+filetypes=("pnm" "tiff" "png" "jpeg")
+
+select pick in "${filetypes[@]}"
+do
+	case $pick in
+		*)	echo $pick	
+			break
+	esac
+done
 }
 
 function scan {
-  [[  $SCANNER && ${SCANNER-x} ]] && scanner=$SCANNER || scanner=$(select-scanner)
-  scanimage -p -d $scanner > $filename.$filetype
+  echo "What name shall be given to the scanned file?"
+  read filename
+  eval filetype=$(select_filetype)
+  scanner=$(select_scanner)
+  scanimage -p -d $scanner --format=$filetype > $filename.$filetype
 }
 
-function batch_scan {
-  $browser http://localhost:631
+function default_scan {
+  echo "What name shall be given to the scanned file?"
+  read filename
+  eval filetype=$(select_filetype)
+  scanimage -p --format=$filetype > $filename.$filetype
 }
+
 
 function main {
     while true; do
     clear
     echo ""
     echo -e "                 ::Printers and scanners::  "
-    echo -e " ┌─────────────────────────────────────────────────────────┐"
-    echo -e " │    1   Manage Printers            2   Print files       │"
-    echo -e " │    3   Set default printer        4   List printers     │"
-    echo -e " │    5   Batch scan to pdf          5                     │"    
-    echo -e " └─────────────────────────────────────────────────────────┘"
-    echo -e "             Select a number - 0 Exit mhwd-tui"
+    echo -e " ┌─────────────────────────────────────────────────────────────┐"
+    echo -e " │    1   Manage Printers            2   Print files           │"
+    echo -e " │    3   Set default printer        4   List printers         │"
+    echo -e " │    5   Set default scanner        6   Scan                  │"    
+    echo -e " │    7   List scanners              8   Scan using defaults   │"    
+    echo -e " └─────────────────────────────────────────────────────────────┘"
+    echo -e "             Select a number - 0 Exit "
     echo ""
     read -s -n1 choix
     case $choix in
@@ -78,10 +107,24 @@ function main {
             ;;
         5)
             echo
-            batch_scan
+            set_default_scanner
             echo ""
             ;;
-
+        6)
+            echo
+            scan
+            echo ""
+            ;;
+        7)
+            echo
+            scanimage -L 2> /dev/null
+            echo ""
+            ;;
+        8)
+            echo
+            default_scan
+            echo ""
+            ;;
         0)
             clear && exit
             read
@@ -95,8 +138,6 @@ function main {
             ;;
     esac
     done
-fi
-
 }
 
 main
