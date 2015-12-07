@@ -288,7 +288,7 @@ function autologger {
             ;;
         7)
             echo
-            sudo pacman -Syu manjaro-printers
+            sudo pacman -Syu manjaro-printers sane
             echo ""
             ;;
         8)
