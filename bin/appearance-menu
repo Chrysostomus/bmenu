@@ -146,7 +146,7 @@ function set_font {
 }
 
 function choose_font {
-new_font=$(fc-list : family | fzf --prompt="< Choose new font to use >")
+new_font=$(fc-list : family | pmenu -p "< Choose new font to use >")
 
 eval $new_font
 echo "  Input the size of the font"
@@ -208,17 +208,17 @@ function main {
             ;;
         7)
             echo
-            $EDITOR .gtkrc-2.0
+            nano .gtkrc-2.0
             echo ""
             ;;
         8)
             echo
-            $EDITOR .config/gtk-3.0/settings.ini
+            nano .config/gtk-3.0/settings.ini
             echo ""
             ;;
         9)
             echo
-            $EDITOR .Xresources
+            nano .Xresources
             echo ""
             ;;
         0)
