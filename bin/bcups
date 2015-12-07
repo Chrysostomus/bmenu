@@ -5,7 +5,98 @@ BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
 browser='elinks'
+printers=$(lpstat -p -d | awk '/printer/ {print $2}')
+enabled_printers=$(lpstat -p -d | awk '/enabled/ {print $2}')
+
 function webinterface {
   $browser http://localhost:631
 }
-webinterface
+
+function set_default_printer {
+  lpoptions -d $(echo $printers | fzf -e --reverse --prompt='Select new default printer >')
+  echo ""
+  echo ""
+  echo "The new default printer has been set"
+}
+
+function print_file {
+  grep -q "Default" ~/.cups/lpoptions && \
+  lpr $(fzf -m --reverse --prompt='Select the files to print (use TAB to mark files for printing) >') || \
+  lpr -P $(echo $printers | fzf -e --reverse --prompt='Select the printer to use >') $(fzf -m --reverse --prompt='Select the files to print (use TAB to mark files for printing) >')
+  echo ""
+  echo ""
+  echo "Printing now"
+  sleep 3
+}
+
+function set_default_scanner {
+  $browser http://localhost:631
+}
+
+function scan {
+  [[  $SCANNER && ${SCANNER-x} ]] && scanner=$SCANNER || scanner=$(select-scanner)
+  scanimage -p -d $scanner > $filename.$filetype
+}
+
+function batch_scan {
+  $browser http://localhost:631
+}
+
+function main {
+    while true; do
+    clear
+    echo ""
+    echo -e "                 ::Printers and scanners::  "
+    echo -e " ┌─────────────────────────────────────────────────────────┐"
+    echo -e " │    1   Manage Printers            2   Print files       │"
+    echo -e " │    3   Set default printer        4   List printers     │"
+    echo -e " │    5   Batch scan to pdf          5                     │"    
+    echo -e " └─────────────────────────────────────────────────────────┘"
+    echo -e "             Select a number - 0 Exit mhwd-tui"
+    echo ""
+    read -s -n1 choix
+    case $choix in
+        1)
+            echo
+            webinterface
+            echo ""
+            ;;
+        2)
+            echo
+            print_file
+            echo ""
+            ;;
+        3)
+            echo
+            set_scanner
+            echo ""
+            ;;
+        4)
+            echo
+            lpstat -p -d
+            echo ""
+            ;;
+        5)
+            echo
+            batch_scan
+            echo ""
+            ;;
+
+        0)
+            clear && exit
+            read
+            ;;
+        *)
+            echo -e "$RED Wrong option $NC"
+            echo "Wait and try again later..."
+            echo ""
+            sleep 3
+            clear
+            ;;
+    esac
+    done
+fi
+
+}
+
+main
