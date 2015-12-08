@@ -5,10 +5,69 @@ BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
 
+if ! [ -f "$HOME/.gtkrc-2.0" ]; then
+	cat > $HOME/.gtkrc-2.0 <<EOL
+
+include "/home/matti/.gtkrc-2.0.mine"
+gtk-theme-name="Adwaita"
+gtk-icon-theme-name="Adwaita"
+gtk-font-name="DejaVu Sans 12"
+gtk-cursor-theme-name="Adwaita"
+gtk-cursor-theme-size=18
+gtk-toolbar-style=GTK_TOOLBAR_ICONS
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=1
+gtk-menu-images=0
+gtk-enable-event-sounds=0
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle="hintmedium"
+gtk-xft-rgba="none"
+
+EOL
+fi
+
+if ! [ -f "$HOME/.config/gtk-3.0/settings.ini" ]; then
+	cat > $HOME/.config/gtk-3.0/settings.ini <<EOL
+[Settings]
+gtk-application-prefer-dark-theme=1
+gtk-theme-name=Adwaita
+gtk-icon-theme-name=Adwaita
+gtk-font-name=DejaVu Sans 12
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=18
+gtk-toolbar-style=GTK_TOOLBAR_ICONS
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=1
+gtk-menu-images=0
+gtk-enable-event-sounds=0
+gtk-enable-input-feedback-sounds=0
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintmedium
+gtk-xft-rgba=none
+gtk-decoration-layout=:menu,appmenu,close
+
+EOL
+fi
+
+if ! [ -f "$HOME/.icons/default/index.theme" ]; then
+	mkdir -r $HOME/.icons/default/
+	cat > $HOME/.icons/default/index.theme <<EOL
+# This file is written by LXAppearance. Do not edit.
+[Icon Theme]
+Name=Default
+Comment=Default Cursor Theme
+Inherits=Adwaita
+EOL
+fi
+
 function set_gtk2_theme {
 	new_theme="$@"
-	cp .gtkrc-2.0 .gtkrc-2.0.bak && sed -i "s/$(grep "gtk-theme-name" .gtkrc-2.0)/gtk-theme-name=\"$new_theme\"/g" .gtkrc-2.0
+	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-theme-name" .gtkrc-2.0)/gtk-theme-name=\"$new_theme\"/g" .gtkrc-2.0
 }
+
 function choose_gtk2_theme {
 PS3="Choose new gtk2 theme: "
 # Gather the results in an array.
@@ -39,7 +98,7 @@ fi
 
 function set_gtk3_theme {
 	new_theme="$@"
-	cp .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-theme-name" .config/gtk-3.0/settings.ini)/gtk-theme-name=$new_theme/g" .config/gtk-3.0/settings.ini
+	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-theme-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-theme-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
 }
 
 function choose_gtk3_theme {
@@ -72,8 +131,8 @@ fi
 
 function set_icon_theme {
 	new_theme="$@"
-	cp .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-icon-theme-name" .config/gtk-3.0/settings.ini)/gtk-icon-theme-name=$new_theme/g" .config/gtk-3.0/settings.ini
-	cp .gtkrc-2.0 .gtkrc-2.0.bak && sed -i "s/$(grep "gtk-icon-theme-name" .gtkrc-2.0)/gtk-icon-theme-name=\"$new_theme\"/g" .gtkrc-2.0	
+	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-icon-theme-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-icon-theme-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
+	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-icon-theme-name" $HOME/.gtkrc-2.0)/gtk-icon-theme-name=\"$new_theme\"/g" $HOME/.gtkrc-2.0	
 }
 
 function choose_icon_theme {
@@ -106,9 +165,9 @@ fi
 
 function set_pointer_theme {
 	new_theme="$@"
-	cp .icons/default/index.theme .icons/default/index.theme.bak && sed -i "s/$(grep "Inherits" .icons/default/index.theme)/Inherits=$new_theme/g" .icons/default/index.theme
-	cp .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-cursor-theme-name" .config/gtk-3.0/settings.ini)/gtk-cursor-theme-name=$new_theme/g" .config/gtk-3.0/settings.ini
-	cp .gtkrc-2.0 .gtkrc-2.0.bak && sed -i "s/$(grep "gtk-cursor-theme-name" .gtkrc-2.0)/gtk-cursor-theme-name=\"$new_theme\"/g" .gtkrc-2.0
+	cp $HOME/.icons/default/index.theme $HOME/.icons/default/index.theme.bak && sed -i "s/$(grep "Inherits" $HOME/.icons/default/index.theme)/Inherits=$new_theme/g" $HOME/.icons/default/index.theme
+	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-cursor-theme-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-cursor-theme-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
+	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-cursor-theme-name" $HOME/.gtkrc-2.0)/gtk-cursor-theme-name=\"$new_theme\"/g" $HOME/.gtkrc-2.0
 }
 
 function choose_pointer_theme {
@@ -141,23 +200,21 @@ fi
 
 function set_font {
 	new_theme="$@"
-	cp .config/gtk-3.0/settings.ini .config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-font-name" .config/gtk-3.0/settings.ini)/gtk-font-name=$new_theme/g" .config/gtk-3.0/settings.ini
-	cp .gtkrc-2.0 .gtkrc-2.0.bak && sed -i "s/$(grep "gtk-font-name" .gtkrc-2.0)/gtk-font-name=\"$new_theme\"/g" .gtkrc-2.0	
+	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-font-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-font-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
+	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-font-name" $HOME/.gtkrc-2.0)/gtk-font-name=\"$new_theme\"/g" $HOME/.gtkrc-2.0	
 }
 
 function choose_font {
-new_font=$(fc-list : family | pmenu -p "< Choose new font to use >")
-
-eval $new_font
+new_font=$(fc-list : family | fzf -e --reverse --prompt="< Choose new font to use >")
 echo "  Input the size of the font"
 read font_size
 
 set_font $new_font $font_size
 }
 function toggle_dark_theme {
-	grep -q "gtk-application-prefer-dark-theme=1" .config/gtk-3.0/settings.ini && \
-	sed -i "s/gtk-application-prefer-dark-theme=1/gtk-application-prefer-dark-theme=0/g" .config/gtk-3.0/settings.ini || \
-	sed -i "s/gtk-application-prefer-dark-theme=0/gtk-application-prefer-dark-theme=1/g" .config/gtk-3.0/settings.ini
+	grep -q "gtk-application-prefer-dark-theme=1" $HOME/.config/gtk-3.0/settings.ini && \
+	sed -i "s/gtk-application-prefer-dark-theme=1/gtk-application-prefer-dark-theme=0/g" $HOME/.config/gtk-3.0/settings.ini || \
+	sed -i "s/gtk-application-prefer-dark-theme=0/gtk-application-prefer-dark-theme=1/g" $HOME/.config/gtk-3.0/settings.ini
 }
 
 function main {
@@ -208,17 +265,17 @@ function main {
             ;;
         7)
             echo
-            nano .gtkrc-2.0
+            nano $HOME/.gtkrc-2.0
             echo ""
             ;;
         8)
             echo
-            nano .config/gtk-3.0/settings.ini
+            nano $HOME/.config/gtk-3.0/settings.ini
             echo ""
             ;;
         9)
             echo
-            nano .Xresources
+            nano $HOME/.Xresources
             echo ""
             ;;
         0)
