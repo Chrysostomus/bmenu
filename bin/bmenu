@@ -35,7 +35,11 @@ function cli_browser {
 	elif [ -e /usr/bin/lynx ]; then
 		lynx
 	else
-		sudo pacman -Sy elinks && elinks
+		if [ - e /var/lib/pacman/db.lck]; then 
+			echo "no cli browser installed and pacman seems to be in use"
+		else 
+			sudo pacman -Sy elinks && elinks
+		fi
 	fi
 }
 function taskmanager {
