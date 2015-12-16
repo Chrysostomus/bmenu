@@ -13,7 +13,11 @@ function cli_filemanager {
 	elif [ -e /usr/bin/mc ]; then
 		mc
 	else
-		sudo pacman -Sy ranger && ranger
+		if [ - e /var/lib/pacman/db.lck]; then 
+			echo "No cli filemanager is installed and pacman seems to be in use"
+		else 
+			sudo pacman -Sy ranger && ranger
+		fi
 	fi
 }
 
@@ -21,7 +25,11 @@ function manage_time {
 	if [ -e /usr/bin/timeset ]; then
 		sudo timeset
 	else
-		sudo pacman -Sy timset && timeset
+		if [ - e /var/lib/pacman/db.lck]; then 
+			echo "Timeset is not installed and pacman seems to be in use"
+		else 
+			sudo pacman -Sy timset && timeset
+		fi
 	fi
 }
 
