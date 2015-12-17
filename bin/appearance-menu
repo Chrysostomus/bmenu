@@ -7,8 +7,7 @@ NC='\e[0m'
 
 if ! [ -f "$HOME/.gtkrc-2.0" ]; then
 	cat > $HOME/.gtkrc-2.0 <<EOL
-
-include "/home/matti/.gtkrc-2.0.mine"
+include "$HOME/.gtkrc-2.0.mine"
 gtk-theme-name="Adwaita"
 gtk-icon-theme-name="Adwaita"
 gtk-font-name="DejaVu Sans 12"
@@ -24,7 +23,6 @@ gtk-xft-antialias=1
 gtk-xft-hinting=1
 gtk-xft-hintstyle="hintmedium"
 gtk-xft-rgba="none"
-
 EOL
 fi
 
@@ -48,7 +46,6 @@ gtk-xft-hinting=1
 gtk-xft-hintstyle=hintmedium
 gtk-xft-rgba=none
 gtk-decoration-layout=:menu,appmenu,close
-
 EOL
 fi
 
@@ -205,7 +202,7 @@ function set_font {
 }
 
 function choose_font {
-new_font=$(fc-list : family | fzf -e --reverse --prompt="< Choose new font to use >")
+new_font=$(fc-list : family | tr , \\n | fzf -e --reverse --prompt="< Choose new font to use >")
 echo "  Input the size of the font"
 read font_size
 
