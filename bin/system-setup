@@ -107,7 +107,7 @@ do
 done
 }
 
-function disk_utilities {
+function disk_utils {
 PS3="Select tool to use? "
 # Gather the results in an array.
 tools=("cfdisk" "cgdisk" "gdisk" "parted" "gparted" "gnome-disks")
