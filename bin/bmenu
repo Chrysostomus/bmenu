@@ -59,7 +59,7 @@ function taskmanager {
 }
 function display_settings {
 	if [ -e /usr/bin/brandr ]; then
-		sudo brandr
+		brandr
 	else
 		if [ - e /var/lib/pacman/db.lck ]; then 
 			echo "Brandr is not installed and pacman seems to be in use"
@@ -70,7 +70,7 @@ function display_settings {
 }
 function hardware_settings {
 	if [ -e /usr/bin/mhwd-tui ]; then
-		sudo mhwd-tui
+		mhwd-tui
 	else
 		if [ - e /var/lib/pacman/db.lck ]; then 
 			echo "Mhwd-tui is not installed and pacman seems to be in use"
