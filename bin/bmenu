@@ -43,7 +43,7 @@ function cli_browser {
 	elif [ -e /usr/bin/lynx ]; then
 		lynx
 	else
-		if [ - e /var/lib/pacman/db.lck ]; then 
+		if [ -e /var/lib/pacman/db.lck ]; then 
 			echo "no cli browser installed and pacman seems to be in use"
 		else 
 			sudo pacman -Sy elinks && elinks
@@ -61,7 +61,7 @@ function display_settings {
 	if [ -e /usr/bin/brandr ]; then
 		brandr
 	else
-		if [ - e /var/lib/pacman/db.lck ]; then 
+		if [ -e /var/lib/pacman/db.lck ]; then 
 			echo "Brandr is not installed and pacman seems to be in use"
 		else 
 			sudo pacman -Sy brandr && brandr
@@ -72,7 +72,7 @@ function hardware_settings {
 	if [ -e /usr/bin/mhwd-tui ]; then
 		mhwd-tui
 	else
-		if [ - e /var/lib/pacman/db.lck ]; then 
+		if [ -e /var/lib/pacman/db.lck ]; then 
 			echo "Mhwd-tui is not installed and pacman seems to be in use"
 		else 
 			sudo pacman -Sy mhwd-tui && mhwd-tui
