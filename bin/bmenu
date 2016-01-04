@@ -13,6 +13,7 @@ function cli_filemanager {
 	elif [ -e /usr/bin/mc ]; then
 		mc
 	else
+		echo "Installing ranger to manage files"
 		if [ - e /var/lib/pacman/db.lck ]; then 
 			echo "No cli filemanager is installed and pacman seems to be in use"
 		else 
@@ -25,6 +26,7 @@ function manage_time {
 	if [ -e /usr/bin/timeset ]; then
 		sudo timeset
 	else
+		echo "Installing timeset to manage time"
 		if [ -e /var/lib/pacman/db.lck ]; then 
 			echo "Timeset is not installed and pacman seems to be in use"
 		else 
@@ -54,6 +56,7 @@ function taskmanager {
 	if [ -e /usr/bin/htop ]; then
 		htop
 	else
+		echo "Installing htop to manage tasks"
 		sudo pacman -Sy htop && htop
 	fi
 }
@@ -61,6 +64,7 @@ function display_settings {
 	if [ -e /usr/bin/brandr ]; then
 		brandr
 	else
+		echo "Installing brandr to manage display"
 		if [ -e /var/lib/pacman/db.lck ]; then 
 			echo "Brandr is not installed and pacman seems to be in use"
 		else 
@@ -72,6 +76,7 @@ function hardware_settings {
 	if [ -e /usr/bin/mhwd-tui ]; then
 		mhwd-tui
 	else
+		echo "Installing mhwd-tui to manage kernels and drivers"
 		if [ -e /var/lib/pacman/db.lck ]; then 
 			echo "Mhwd-tui is not installed and pacman seems to be in use"
 		else 
@@ -84,7 +89,7 @@ function hardware_settings {
     echo ""
     echo -e "                       ::Main menu::  "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
-    echo -e " │    1   Hardware                     2   Display             │"
+    echo -e " │    1   Kernels and drivers          2   Display             │"
     echo -e " │    3   Printers                     4   Appearance          │"
     echo -e " │    5   Package manager              6   Network             │"    
     echo -e " │    7   Sound                        8   Configuration       │"
