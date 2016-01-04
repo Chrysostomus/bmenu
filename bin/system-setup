@@ -278,6 +278,7 @@ function autologger {
             ;;
         5)
             echo
+            echo -e "Your current shell is $(echo $SHELL)"
             shell_chooser
             echo ""
             ;;
