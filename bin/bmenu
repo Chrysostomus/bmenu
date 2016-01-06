@@ -4,9 +4,13 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
-systemctl status NetworkManager.service | grep -q " active " && netcommand="nmtui"
-systemctl status Netctl.service | grep -q " active " && netcommand="sudo wifi-menu"
-
+if [ $(cat /proc/1/comm) = "systemd" ]; then
+	systemctl status NetworkManager.service | grep -q " active " && netcommand="nmtui"
+	systemctl status Netctl.service | grep -q " active " && netcommand="sudo wifi-menu"
+else
+	rc-status | grep -q "NetworkManager" && netcommand="nmtui"
+	rc-status | grep -q "Netctl" && netcommand="sudo wifi-menu"
+fi
 function cli_filemanager {
 	if [ -e /usr/bin/ranger ]; then
 		ranger
