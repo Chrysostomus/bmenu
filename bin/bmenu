@@ -26,6 +26,19 @@ function cli_filemanager {
 	fi
 }
 
+function file_finder {
+	if [ -e /usr/bin/rifle ]; then
+		rifle $(fzf)
+	else
+		echo "Installing ranger to get a rifle"
+		if [ - e /var/lib/pacman/db.lck ]; then 
+			echo "Rifle is not installed and pacman seems to be in use"
+		else 
+			sudo pacman -Sy ranger && rifle $(fzf)
+		fi
+	fi
+}
+
 function manage_time {
 	if [ -e /usr/bin/timeset ]; then
 		sudo timeset
@@ -95,7 +108,7 @@ function display_settings {
     case $choix in
         1)
             echo
-            fzf
+            file_finder
             echo ""
             ;;
         2)
