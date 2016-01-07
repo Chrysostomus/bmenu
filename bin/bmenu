@@ -34,7 +34,7 @@ function manage_time {
 		if [ -e /var/lib/pacman/db.lck ]; then 
 			echo "Timeset is not installed and pacman seems to be in use"
 		else 
-			sudo pacman -Sy timeset && sudo timeset
+			sudo yaourt -Sy timeset && sudo timeset
 		fi
 	fi
 }
@@ -76,24 +76,13 @@ function display_settings {
 		fi
 	fi
 }
-function hardware_settings {
-	if [ -e /usr/bin/mhwd-tui ]; then
-		mhwd-tui
-	else
-		echo "Installing mhwd-tui to manage kernels and drivers"
-		if [ -e /var/lib/pacman/db.lck ]; then 
-			echo "Mhwd-tui is not installed and pacman seems to be in use"
-		else 
-			sudo pacman -Sy mhwd-tui && mhwd-tui
-		fi
-	fi
-}
+
     while true; do
     clear
     echo ""
     echo -e "                       ::Main menu::  "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
-    echo -e " │    1   Kernels and drivers          2   Display             │"
+    echo -e " │    1   Find                         2   Display             │"
     echo -e " │    3   Printers                     4   Appearance          │"
     echo -e " │    5   Package manager              6   Network             │"    
     echo -e " │    7   Sound                        8   Configuration       │"
@@ -106,7 +95,7 @@ function hardware_settings {
     case $choix in
         1)
             echo
-            hardware_settings
+            fzf
             echo ""
             ;;
         2)
