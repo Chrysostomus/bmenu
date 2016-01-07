@@ -28,13 +28,13 @@ function cli_filemanager {
 
 function file_finder {
 	if [ -e /usr/bin/rifle ]; then
-		rifle $(fzf)
+		rifle $(find -type f | fzf -e --reverse)
 	else
 		echo "Installing ranger to get a rifle"
 		if [ - e /var/lib/pacman/db.lck ]; then 
 			echo "Rifle is not installed and pacman seems to be in use"
 		else 
-			sudo pacman -Sy ranger && rifle $(fzf)
+			sudo pacman -Sy ranger && rifle $(find -type f | fzf -e --reverse)
 		fi
 	fi
 }
