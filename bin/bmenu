@@ -26,6 +26,19 @@ function cli_filemanager {
 	fi
 }
 
+function file_finder {
+	if [ -e /usr/bin/rifle ]; then
+		rifle $(find -type f | fzf -e --reverse)
+	else
+		echo "Installing ranger to get a rifle"
+		if [ - e /var/lib/pacman/db.lck ]; then 
+			echo "Rifle is not installed and pacman seems to be in use"
+		else 
+			sudo pacman -Sy ranger && rifle $(find -type f | fzf -e --reverse)
+		fi
+	fi
+}
+
 function manage_time {
 	if [ -e /usr/bin/timeset ]; then
 		sudo timeset
@@ -99,6 +112,7 @@ function hardware_settings {
     echo -e " │    7   Sound                        8   Configuration       │"
     echo -e " │    9   Time settings                T   Taskmanager         │"
     echo -e " │    F   File Manager                 B   Browser             │"
+    echo -e " │    S   Search                                               │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
     echo -e "        Select an item        -        0   Exit "
     echo ""
@@ -162,6 +176,11 @@ function hardware_settings {
         b|B)
             echo
             cli_browser
+            echo ""
+            ;;
+        s|S)
+            echo
+            file_finder
             echo ""
             ;;
         0)
