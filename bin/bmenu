@@ -101,6 +101,15 @@ function hardware_settings {
 		fi
 	fi
 }
+
+function init_settings {
+if [ $(cat /proc/1/comm) = "systemd" ]; then
+	initmenu
+else
+	initmenu-openrc
+fi
+}
+
     while true; do
     clear
     echo ""
@@ -112,7 +121,7 @@ function hardware_settings {
     echo -e " │    7   Sound                        8   Configuration       │"
     echo -e " │    9   Time settings                T   Taskmanager         │"
     echo -e " │    F   File Manager                 B   Browser             │"
-    echo -e " │    S   Search                                               │"
+    echo -e " │    S   Search                       I   Init-system         │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
     echo -e "        Select an item        -        0   Exit "
     echo ""
@@ -181,6 +190,11 @@ function hardware_settings {
         s|S)
             echo
             file_finder
+            echo ""
+            ;;
+        i|I)
+            echo
+            init_settings
             echo ""
             ;;
         0)
