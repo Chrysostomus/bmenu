@@ -1,0 +1,152 @@
+#!/bin/bash
+
+RED='\e[41m'
+BLUE='\e[44m'
+ORANGE='\e[46m'
+NC='\e[0m'
+
+function config_editor {
+PS3="Select file to configure: "
+configs=("journald.conf" "system.conf" "logind.conf" "user.conf" "cancel")
+
+select pick in "${configs[@]}"
+do
+	case $pick in
+		logind.conf)
+			sudo nano /etc/systemd/logind.conf 
+			break
+			;;		
+		system.conf)
+			sudo nano /etc/systemd/system.conf
+			break
+			;;		
+		journald.conf)
+			sudo nano /etc/systemd/journald.conf
+			break
+			;;		
+		user.conf)
+			sudo nano /etc/systemd/user.conf
+			break
+			;;		
+		cancel)
+			break
+	esac
+done
+	
+}
+
+function change_runlevel {
+PS3="Select target to change to: "
+targets=("poweroff" "rescue" "multi-user" "graphical" "reboot" "cancel")
+
+select pick in "${targets[@]}"
+do
+	case $pick in
+		poweroff)
+			sudo systemctl isolate poweroff.target
+			break
+			;;		
+		reboot)
+			sudo systemctl isolate reboot.target
+			break
+			;;		
+		rescue)
+			sudo systemctl isolate rescue.target
+			break
+			;;		
+		multi-user)
+			sudo systemctl isolate multi-user.target
+			break
+			;;		
+		graphical)
+			sudo systemctl isolate graphical.target
+			break
+			;;		
+		cancel)
+			break
+	esac
+done
+	
+	
+}
+
+function enable_services {
+	sudo systemctl enable $(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
+}
+
+function start_services {
+	sudo systemctl start $(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
+}
+
+function stop_services {
+	sudo systemctl stop $(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
+}
+
+function disable_services {
+	sudo systemctl disable $(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
+}
+
+    while true; do
+    clear
+    echo ""
+    echo -e "                       ::Init menu::  "
+    echo -e " ┌─────────────────────────────────────────────────────────────┐"
+    echo -e " │    1   Enable services              2   Disable services    │"
+    echo -e " │    3   Start services               4   Stop Services       │"
+    echo -e " │    5   List active services         6   Show boot messages  │"    
+    echo -e " │    7   Edit configuration files     8   Change runlevel     │"
+    echo -e " │    9   Analyze boot                                         │"
+    echo -e " └─────────────────────────────────────────────────────────────┘"
+    echo -e "          Select an item      -        0   Exit "
+    echo ""
+    read -s -n1 choix
+    case $choix in
+        1)
+            echo
+            enable_services
+            echo ""
+            ;;
+        2)
+            echo
+            disable_services
+            echo ""
+            ;;
+        3)
+            echo
+            start_services
+            echo ""
+            ;;
+        4)
+            echo
+            stop_services
+            echo ""
+            ;;
+        5)
+            echo
+            systemctl
+            echo ""
+            ;;
+        6)
+            echo
+            journatlctl
+            dmesg
+            echo ""
+            ;;
+        7)
+            echo
+            config_editor
+            echo ""
+            ;;
+        8)
+            echo
+            change_runlevel
+            echo ""
+            ;;
+        9)
+            echo
+            systemd-analyze blame
+            echo ""
+            ;;
+    esac
+    done
+fi
