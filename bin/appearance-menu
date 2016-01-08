@@ -209,6 +209,7 @@ read font_size
 set_font $new_font $font_size
 }
 function toggle_dark_theme {
+grep -q "gtk-application-prefer-dark-theme=" || echo "gtk-application-prefer-dark-theme=1" >> $HOME/.config/gtk-3.0/settings.ini
 	grep -q "gtk-application-prefer-dark-theme=1" $HOME/.config/gtk-3.0/settings.ini && \
 	sed -i "s/gtk-application-prefer-dark-theme=1/gtk-application-prefer-dark-theme=0/g" $HOME/.config/gtk-3.0/settings.ini || \
 	sed -i "s/gtk-application-prefer-dark-theme=0/gtk-application-prefer-dark-theme=1/g" $HOME/.config/gtk-3.0/settings.ini
@@ -218,7 +219,7 @@ function main {
     while true; do
     clear
     echo ""
-    echo -e "                              ::Appearance::  "
+    echo -e "                            ::Appearance::  "
     echo -e " ┌────────────────────────────────────────────────────────────────┐"
     echo -e " │    1   Set gtk2 theme               2   Set gtk3 theme         │"
     echo -e " │    3   Set font                     4   Set icon theme         │"
@@ -226,7 +227,7 @@ function main {
     echo -e " │    7   Edit gtk2 settings           8   Edit gtk3 settings     │" 
     echo -e " │    9   Edit Xresources              0   Exit                   │"   
     echo -e " └────────────────────────────────────────────────────────────────┘"
-        echo -e "             Select a number and press [Enter] "
+    echo -e "                            Select a number "
     echo ""
     read -s -n1 choix
     case $choix in
