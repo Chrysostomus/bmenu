@@ -39,15 +39,15 @@ done
     while true; do
     clear
     echo ""
-    echo -e "                       ::Settings::  "
+    echo -e "                          ::Settings:: "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
     echo -e " │    1   Pacman settings              2   Mkinitcpio          │"
     echo -e " │    3   Fstab                        4   Sudoers             │"
     echo -e " │    5   Logind                       6   Bootloader          │"    
     echo -e " │    7   Udevil settings              8   Xinitrc             │"
-    echo -e " │    9   Setup                        0   Exit                │"
+    echo -e " │    9   Setup                                                │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
-        echo -e "              Select a number and press [Enter]"
+    echo -e "          Select an item       -       0   Exit "
     echo ""
     read -s -n1 choix
     case $choix in

@@ -113,7 +113,7 @@ fi
     while true; do
     clear
     echo ""
-    echo -e "                       ::Main menu::  "
+    echo -e "                          ::Main menu:: "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
     echo -e " │    1   Kernels and drivers          2   Display             │"
     echo -e " │    3   Printers                     4   Appearance          │"
@@ -123,7 +123,7 @@ fi
     echo -e " │    F   File Manager                 B   Browser             │"
     echo -e " │    S   Search                       I   Init-system         │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
-    echo -e "        Select an item        -        0   Exit "
+    echo -e "          Select an item       -       0   Exit "
     echo ""
     read -s -n1 choix
     case $choix in

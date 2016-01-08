@@ -12,7 +12,7 @@ function scanner_interface {
 	if [ -e /usr/bin/xsane ]; then
 		xsane
 	else
-		if [ - e /var/lib/pacman/db.lck]; then 
+		if [ - e /var/lib/pacman/db.lck ]; then 
 			echo "Xsane is not installed and pacman seems to be in use"
 		else 
 			sudo pacman -Sy xsane && xsane
@@ -87,14 +87,14 @@ function main {
     while true; do
     clear
     echo ""
-    echo -e "                 ::Printers and scanners::  "
+    echo -e "                    ::Printers and scanners:: "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
     echo -e " │    1   Manage Printers            2   Print files           │"
     echo -e " │    3   Set default printer        4   List printers         │"
     echo -e " │    5   Set default scanner        6   Scan with GUI         │"    
     echo -e " │    7   List scanners              8   Scan using defaults   │"    
     echo -e " └─────────────────────────────────────────────────────────────┘"
-    echo -e "             Select a number - 0 Exit "
+    echo -e "          Select an item      -      0 Exit "
     echo ""
     read -s -n1 choix
     case $choix in

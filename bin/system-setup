@@ -244,15 +244,14 @@ function autologger {
     while true; do
     clear
     echo ""
-    echo -e "                       ::Setup::  "
+    echo -e "                            ::Setup:: "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
     echo -e " │    1   Enable hibernation        2   Choose Display manager │"
     echo -e " │    3   Enable autologin          4   Install AUR support    │"
     echo -e " │    5   Choose shell              6   Disk utility           │"    
     echo -e " │    7   Install printer support   8   Recover files          │"
-    echo -e " │    0   Exit                                                 │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
-    echo -e "              Select a number and press [Enter]"
+    echo -e "          Select an item     -      0   Exit "
     echo ""
     read -s -n1 choix
     case $choix in

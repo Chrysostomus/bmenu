@@ -31,8 +31,7 @@ do
 		cancel)
 			break
 	esac
-done
-	
+done	
 } 
 
 function enable_services {
@@ -54,14 +53,14 @@ function disable_services {
     while true; do
     clear
     echo ""
-    echo -e "                       ::Init menu::  "
+    echo -e "                          ::Init menu:: "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
     echo -e " │    1   Enable services              2   Disable services    │"
     echo -e " │    3   Start services               4   Stop Services       │"
     echo -e " │    5   List active services         6   Show boot messages  │"    
     echo -e " │    7   Edit configuration files                             │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
-    echo -e "          Select an item      -        0   Exit "
+    echo -e "          Select an item       -       0   Exit "
     echo ""
     read -s -n1 choix
     case $choix in
@@ -99,6 +98,17 @@ function disable_services {
             echo
             config_editor
             echo ""
+            ;;
+        0)
+            clear && exit
+            read
+            ;;
+        *)
+            echo -e "$RED Wrong option $NC"
+            echo "Wait and try again later..."
+            echo ""
+            sleep 3
+            clear
             ;;
     esac
     done
