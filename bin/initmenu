@@ -71,19 +71,19 @@ done
 }
 
 function enable_services {
-	sudo systemctl enable $(ls /lib/systemd/system/*.service | cut -d / -f 5 | fzf -m -e --reverse)
+	sudo systemctl enable $(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
 }
 
 function start_services {
-	sudo systemctl start $(ls /lib/systemd/system/*.service | cut -d / -f 5 | fzf -m -e --reverse)
+	sudo systemctl start $(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
 }
 
 function stop_services {
-	sudo systemctl stop $(systemctl | fzf -m -e --reverse | awk '{print $1}')
+	sudo systemctl stop $(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
 }
 
 function disable_services {
-	sudo systemctl disable $(systemctl | fzf -m -e --reverse | awk '{print $1}')
+	sudo systemctl disable $(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
 }
 
     while true; do
