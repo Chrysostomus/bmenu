@@ -1,0 +1,105 @@
+#!/bin/bash
+
+RED='\e[41m'
+BLUE='\e[44m'
+ORANGE='\e[46m'
+NC='\e[0m'
+
+function config_editor {
+PS3="Select file to configure: "
+configs=("xdm" "rc.local" "sysctl.conf" "modules" "cancel")
+
+select pick in "${configs[@]}"
+do
+	case $pick in
+		xdm)
+			sudo nano /etc/conf.d/xdm
+			break
+			;;		
+		rc.local)
+			sudo nano /etc/rc.local
+			break
+			;;		
+		sysctl.conf)
+			sudo nano /etc/sysctl.conf
+			break
+			;;		
+		modules)
+			sudo nano /etc/conf.d/modules
+			break
+			;;		
+		cancel)
+			break
+	esac
+done
+	
+} 
+
+function enable_services {
+	sudo rc-update add $(rc-status -s | awk '/stopped/ {print $1}' | fzf -m -e --reverse)
+}
+
+function start_services {
+	sudo rc-service start $(rc-status -s | awk '/stopped/ {print $1}' | fzf -m -e --reverse)
+}
+
+function stop_services {
+	sudo rc-service stop $(rc-status -s | awk '/started/ {print $1}' | fzf -m -e --reverse)
+}
+
+function disable_services {
+	sudo rc-update del $(rc-status -s | awk '/started/ {print $1}' | fzf -m -e --reverse)
+}
+
+    while true; do
+    clear
+    echo ""
+    echo -e "                       ::Init menu::  "
+    echo -e " ┌─────────────────────────────────────────────────────────────┐"
+    echo -e " │    1   Enable services              2   Disable services    │"
+    echo -e " │    3   Start services               4   Stop Services       │"
+    echo -e " │    5   List active services         6   Show boot messages  │"    
+    echo -e " │    7   Edit configuration files                             │"
+    echo -e " └─────────────────────────────────────────────────────────────┘"
+    echo -e "          Select an item      -        0   Exit "
+    echo ""
+    read -s -n1 choix
+    case $choix in
+        1)
+            echo
+            enable_services
+            echo ""
+            ;;
+        2)
+            echo
+            disable_services
+            echo ""
+            ;;
+        3)
+            echo
+            start_services
+            echo ""
+            ;;
+        4)
+            echo
+            stop_services
+            echo ""
+            ;;
+        5)
+            echo
+            rc-status
+            echo ""
+            ;;
+        6)
+            echo
+            dmesg
+            echo ""
+            ;;
+        7)
+            echo
+            config_editor
+            echo ""
+            ;;
+    esac
+    done
+fi
