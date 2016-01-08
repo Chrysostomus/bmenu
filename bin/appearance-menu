@@ -209,7 +209,7 @@ read font_size
 set_font $new_font $font_size
 }
 function toggle_dark_theme {
-grep -q "gtk-application-prefer-dark-theme=" || echo "gtk-application-prefer-dark-theme=1" >> $HOME/.config/gtk-3.0/settings.ini
+	grep -q "gtk-application-prefer-dark-theme=" $HOME/.config/gtk-3.0/settings.ini || echo "gtk-application-prefer-dark-theme=1" >> $HOME/.config/gtk-3.0/settings.ini
 	grep -q "gtk-application-prefer-dark-theme=1" $HOME/.config/gtk-3.0/settings.ini && \
 	sed -i "s/gtk-application-prefer-dark-theme=1/gtk-application-prefer-dark-theme=0/g" $HOME/.config/gtk-3.0/settings.ini || \
 	sed -i "s/gtk-application-prefer-dark-theme=0/gtk-application-prefer-dark-theme=1/g" $HOME/.config/gtk-3.0/settings.ini
