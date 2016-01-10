@@ -72,33 +72,61 @@ select pick in "${dms[@]}"
 do
 	case $pick in
 		slim)
+			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy slim slim-themes && sudo systemctl enable slim.service -f
+			else
+			sudo pacman -Sy slim slim-themes && sudo sed -i "s/$(grep "DISPLAYMANAGER=" /etc/conf.d/xdm)/DISPLAYMANAGER=\"slim\"/g" /etc/conf.d/xdm
+			sudo rc-update add xdm default
 			break
 			;;		
 		lightdm)
+			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy lightdm lightdm-another-gtk-greeter lightdm-another-gtk-greeter-themes accountsservice \
 			&& sudo systemctl enable lightdm.service -f && sudo systemctl enable accounts-daemon && \
 			sudo nano /etc/lightdm/lightdm.conf
+			else
+			sudo pacman -Sy lightdm lightdm-another-gtk-greeter lightdm-another-gtk-greeter-themes accountsservice \
+			&& sudo sed -i "s/$(grep "DISPLAYMANAGER=" /etc/conf.d/xdm)/DISPLAYMANAGER=\"lightdm\"/g" /etc/conf.d/xdm && \
+			sudo nano /etc/lightdm/lightdm.conf
+			sudo rc-update add xdm default
 			break
 			;;		
 		sddm)
+			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy sddm && sudo systemctl enable sddm.service -f
+			else
+			sudo pacman -Sy sddm && sudo sed -i "s/$(grep "DISPLAYMANAGER=" /etc/conf.d/xdm)/DISPLAYMANAGER=\"sddm\"/g" /etc/conf.d/xdm
+			sudo rc-update add xdm default
 			break
 			;;		
 		mdm)
+			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy mdm && sudo systemctl enable mdm.service -f
+			else
+			sudo pacman -Sy mdm-nosystemd && sudo sed -i "s/$(grep "DISPLAYMANAGER=" /etc/conf.d/xdm)/DISPLAYMANAGER=\"mdm\"/g" /etc/conf.d/xdm
+			sudo rc-update add xdm default
 			break
 			;;		
 		lxdm)
+			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy lxdm && sudo systemctl enable lxdm.service -f
+			else
+			sudo pacman -Sy lxdm-consolekit && sudo sed -i "s/$(grep "DISPLAYMANAGER=" /etc/conf.d/xdm)/DISPLAYMANAGER=\"lxdm\"/g" /etc/conf.d/xdm
 			break
 			;;		
 		gdm)
+			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy gdm3setup && sudo systemctl enable gdm.service -f
+			else
+			echo "gdm will not work with openrc"
 			break
 			;;		
 		kdm)
+			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy kdebase-workspace archlinux-themes-kdm && sudo systemctl enable kdm.service -f
+			else
+			sudo pacman -Sy kdebase-workspace-consolekit archlinux-themes-kdm && sudo sed -i "s/$(grep "DISPLAYMANAGER=" /etc/conf.d/xdm)/DISPLAYMANAGER=\"kdm\"/g" /etc/conf.d/xdm
+			sudo rc-update add xdm default 
 			break
 			;;		
 		cancel)
@@ -161,9 +189,13 @@ esac
 }
 
 function dm_detect {
+if [ $(cat /proc/1/comm) = "systemd" ]; then
 	for displaymanager in kdm gdm sddm lightdm lxdm slim; do
-	systemctl status $displaymanager.service | grep -q enabled && echo $displaymanager
+		systemctl status $displaymanager.service | grep -q enabled && echo $displaymanager
 	done
+else
+	grep 'DISPLAYMANAGER=' /etc/conf.d/xdm | cut -d \" -f 2
+fi
 }
 
 function choose_session {
@@ -236,7 +268,11 @@ function autologger {
 			break
 			;;		
 		*)
-			sudo pacman -Syu xlogin && sudo systemctl enable xlogin@$(whoami)
+			if ! [[ -d /run/openrc ]] ; then
+				sudo pacman -Syu xlogin && sudo systemctl enable xlogin@$(whoami)
+			else
+				echo -e "No support for setting up autologin without displaymanager on openrc. Yet."
+			fi
 			;;
 	esac
 }
