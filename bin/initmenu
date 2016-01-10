@@ -131,6 +131,8 @@ function disable_services {
             journatlctl
             dmesg
             echo ""
+            echo "Press any key to continue"
+            read
             ;;
         7)
             echo
