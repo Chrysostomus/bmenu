@@ -146,6 +146,8 @@ function disable_services {
             echo
             systemd-analyze blame
             echo ""
+            echo "Press any key to continue"
+            read
             ;;
         0)
             clear && exit
