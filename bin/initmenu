@@ -105,26 +105,36 @@ function disable_services {
             echo
             enable_services
             echo ""
+            echo "Press any key to continue"
+            read
             ;;
         2)
             echo
             disable_services
             echo ""
+            echo "Press any key to continue"
+            read
             ;;
         3)
             echo
             start_services
             echo ""
+            echo "Press any key to continue"
+            read
             ;;
         4)
             echo
             stop_services
             echo ""
+            echo "Press any key to continue"
+            read
             ;;
         5)
             echo
             systemctl
             echo ""
+            echo "Press any key to continue"
+            read
             ;;
         6)
             echo
