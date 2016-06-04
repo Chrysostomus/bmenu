@@ -4,132 +4,50 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
-STATUSVAR=0
-TEXTEDITOR=$EDITOR
-
-# Service messages section
-CONTINMSG="Press any key to continue"
-ERRORMSG="$RED Wrong option $NC"
-TRYAGAINMSG="Press Enter and try again"
-SELECTFILEMSG="Select file to configure and press Enter: "
-SELECTTARGETMSG="Select target and press Enter to change to: "
-SERVICESTARTEDMSG="Service was started successfully"
-SERVICEENABLEDMSG="Service was enabled successfully"
-SERVICESTOPPEDMSG="Service was stopped successfully"
-SERVICEDISABLEDMSG="Service was disabled successfully"
 
 function config_editor {
-PS3="$SELECTFILEMSG"
-configs=("journald.conf" "system.conf" "logind.conf" "user.conf" "cancel")
+PS3="Select file to configure: "
+configs=("xdm" "rc.local" "sysctl.conf" "modules" "cancel")
 
 select pick in "${configs[@]}"
 do
 	case $pick in
-		logind.conf)
-			sudo $TEXTEDITOR /etc/systemd/logind.conf 
+		xdm)
+			sudo nano /etc/conf.d/xdm
 			break
 			;;		
-		system.conf)
-			sudo $TEXTEDITOR /etc/systemd/system.conf
+		rc.local)
+			sudo nano /etc/rc.local
 			break
 			;;		
-		journald.conf)
-			sudo $TEXTEDITOR /etc/systemd/journald.conf
+		sysctl.conf)
+			sudo nano /etc/sysctl.conf
 			break
 			;;		
-		user.conf)
-			sudo $TEXTEDITOR /etc/systemd/user.conf
-			break
-			;;		
-		cancel)
-			break
-	esac
-done
-	
-}
-
-function change_runlevel {
-PS3="$SELECTTARGETMSG"
-targets=("poweroff" "rescue" "multi-user" "graphical" "reboot" "cancel")
-
-select pick in "${targets[@]}"
-do
-	case $pick in
-		poweroff)
-			sudo systemctl isolate poweroff.target
-			break
-			;;		
-		reboot)
-			sudo systemctl isolate reboot.target
-			break
-			;;		
-		rescue)
-			sudo systemctl isolate rescue.target
-			break
-			;;		
-		multi-user)
-			sudo systemctl isolate multi-user.target
-			break
-			;;		
-		graphical)
-			sudo systemctl isolate graphical.target
+		modules)
+			sudo nano /etc/conf.d/modules
 			break
 			;;		
 		cancel)
 			break
 	esac
-done
-	
-	
-}
+done	
+} 
 
 function enable_services {
-	OUTPUTITEM=""
-	OUTPUTITEM=$(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]
-	then
-		sudo systemctl enable $OUTPUTITEM
-		STATUSVAR=$?
-	else
-		STATUSVAR=1
-	fi
+	sudo rc-update add $(rc-status -s | awk '/stopped/ {print $1}' | fzf -m -e --reverse)
 }
 
 function start_services {
-	OUTPUTITEM=""
-	OUTPUTITEM=$(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]
-	then
-		sudo systemctl start $OUTPUTITEM
-		STATUSVAR=$?
-	else
-		STATUSVAR=1
-	fi
+	sudo rc-service start $(rc-status -s | awk '/stopped/ {print $1}' | fzf -m -e --reverse)
 }
 
 function stop_services {
-	OUTPUTITEM=""
-	OUTPUTITEM=$(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]
-	then
-		sudo systemctl stop $OUTPUTITEM
-		STATUSVAR=$?
-	else
-		STATUSVAR=1
-	fi
+	sudo rc-service stop $(rc-status -s | awk '/started/ {print $1}' | fzf -m -e --reverse)
 }
 
 function disable_services {
-	OUTPUTITEM=""
-	OUTPUTITEM=$(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]
-	then
-		sudo systemctl disable $OUTPUTITEM
-		STATUSVAR=$?
-	else
-		STATUSVAR=1
-	fi
-
+	sudo rc-update del $(rc-status -s | awk '/started/ {print $1}' | fzf -m -e --reverse)
 }
 
     while true; do
@@ -140,8 +58,7 @@ function disable_services {
     echo -e " │    1   Enable services              2   Disable services    │"
     echo -e " │    3   Start services               4   Stop Services       │"
     echo -e " │    5   List active services         6   Show boot messages  │"    
-    echo -e " │    7   Edit configuration files     8   Change runlevel     │"
-    echo -e " │    9   Analyze boot                                         │"
+    echo -e " │    7   Edit configuration files                             │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
     echo -e "          Select an item       -       0   Exit "
     echo ""
@@ -150,94 +67,47 @@ function disable_services {
         1)
             echo
             enable_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo "$SERVICEENABLEDMSG"
-		    echo "$CONTINMSG"
-		    read
-	    else
-		    echo ""
-	    fi
-	    STATUSVAR=0
+            echo ""
             ;;
         2)
             echo
             disable_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo "$SERVICEDISABLEDMSG"
-		    echo "$CONTINMSG"
-		    read
-	    else
-		    echo ""
-	    fi
-	    STATUSVAR=0
+            echo ""
             ;;
         3)
             echo
             start_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo "$SERVICESTARTEDMSG"
-		    echo "$CONTINMSG"
-		    read
-	    else
-		    echo""
-	    fi
-	    STATUSVAR=0
+            echo ""
             ;;
         4)
             echo
             stop_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo "$SERVICESTOPPEDMSG"
-		    echo "$CONTINMSG"
-		    read
-	    else
-		    echo ""
-	    fi
-	    STATUSVAR=0
-	    ;;
+            echo ""
+            ;;
         5)
             echo
-            systemctl
+            rc-status
             echo ""
-            echo "$CONTINMSG"
-            read
             ;;
         6)
             echo
-            journatlctl
             dmesg
             echo ""
-            echo "$CONTINMSG"
-            read
             ;;
         7)
             echo
             config_editor
             echo ""
             ;;
-        8)
-            echo
-            change_runlevel
-            echo ""
-            ;;
-        9)
-            echo
-            systemd-analyze blame
-            echo ""
-            echo "$CONTINMSG"
-            read
-            ;;
         0)
             clear && exit
+            read
             ;;
         *)
-            echo -e "$ERRORMSG"
-	    echo "$TRYAGAINMSG"
-            read
+            echo -e "$RED Wrong option $NC"
+            echo "Wait and try again later..."
+            echo ""
+            sleep 3
             clear
             ;;
     esac
