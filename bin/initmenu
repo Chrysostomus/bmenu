@@ -4,28 +4,41 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
+STATUSVAR=0
+TEXTEDITOR=$EDITOR
+
+# Service messages section
+CONTINMSG="Press any key to continue"
+ERRORMSG="$RED Wrong option $NC"
+TRYAGAINMSG="Press Enter and try again"
+SELECTFILEMSG="Select file to configure and press Enter: "
+SELECTTARGETMSG="Select target and press Enter to change to: "
+SERVICESTARTEDMSG="Service was started successfully"
+SERVICEENABLEDMSG="Service was enabled successfully"
+SERVICESTOPPEDMSG="Service was stopped successfully"
+SERVICEDISABLEDMSG="Service was disabled successfully"
 
 function config_editor {
-PS3="Select file to configure: "
+PS3="$SELECTFILEMSG"
 configs=("journald.conf" "system.conf" "logind.conf" "user.conf" "cancel")
 
 select pick in "${configs[@]}"
 do
 	case $pick in
 		logind.conf)
-			sudo nano /etc/systemd/logind.conf 
+			sudo $TEXTEDITOR /etc/systemd/logind.conf 
 			break
 			;;		
 		system.conf)
-			sudo nano /etc/systemd/system.conf
+			sudo $TEXTEDITOR /etc/systemd/system.conf
 			break
 			;;		
 		journald.conf)
-			sudo nano /etc/systemd/journald.conf
+			sudo $TEXTEDITOR /etc/systemd/journald.conf
 			break
 			;;		
 		user.conf)
-			sudo nano /etc/systemd/user.conf
+			sudo $TEXTEDITOR /etc/systemd/user.conf
 			break
 			;;		
 		cancel)
@@ -36,7 +49,7 @@ done
 }
 
 function change_runlevel {
-PS3="Select target to change to: "
+PS3="$SELECTTARGETMSG"
 targets=("poweroff" "rescue" "multi-user" "graphical" "reboot" "cancel")
 
 select pick in "${targets[@]}"
@@ -71,19 +84,52 @@ done
 }
 
 function enable_services {
-	sudo systemctl enable $(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
+	OUTPUTITEM=""
+	OUTPUTITEM=$(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
+	if [ "$OUTPUTITEM" != "" ]
+	then
+		sudo systemctl enable $OUTPUTITEM
+		STATUSVAR=$?
+	else
+		STATUSVAR=1
+	fi
 }
 
 function start_services {
-	sudo systemctl start $(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
+	OUTPUTITEM=""
+	OUTPUTITEM=$(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
+	if [ "$OUTPUTITEM" != "" ]
+	then
+		sudo systemctl start $OUTPUTITEM
+		STATUSVAR=$?
+	else
+		STATUSVAR=1
+	fi
 }
 
 function stop_services {
-	sudo systemctl stop $(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
+	OUTPUTITEM=""
+	OUTPUTITEM=$(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
+	if [ "$OUTPUTITEM" != "" ]
+	then
+		sudo systemctl stop $OUTPUTITEM
+		STATUSVAR=$?
+	else
+		STATUSVAR=1
+	fi
 }
 
 function disable_services {
-	sudo systemctl disable $(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
+	OUTPUTITEM=""
+	OUTPUTITEM=$(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
+	if [ "$OUTPUTITEM" != "" ]
+	then
+		sudo systemctl disable $OUTPUTITEM
+		STATUSVAR=$?
+	else
+		STATUSVAR=1
+	fi
+
 }
 
     while true; do
@@ -104,36 +150,60 @@ function disable_services {
         1)
             echo
             enable_services
-            echo ""
-            echo "Press any key to continue"
-            read
+	    if [ $STATUSVAR -eq 0 ]
+	    then
+		    echo "$SERVICEENABLEDMSG"
+		    echo "$CONTINMSG"
+		    read
+	    else
+		    echo ""
+	    fi
+	    STATUSVAR=0
             ;;
         2)
             echo
             disable_services
-            echo ""
-            echo "Press any key to continue"
-            read
+	    if [ $STATUSVAR -eq 0 ]
+	    then
+		    echo "$SERVICEDISABLEDMSG"
+		    echo "$CONTINMSG"
+		    read
+	    else
+		    echo ""
+	    fi
+	    STATUSVAR=0
             ;;
         3)
             echo
             start_services
-            echo ""
-            echo "Press any key to continue"
-            read
+	    if [ $STATUSVAR -eq 0 ]
+	    then
+		    echo "$SERVICESTARTEDMSG"
+		    echo "$CONTINMSG"
+		    read
+	    else
+		    echo""
+	    fi
+	    STATUSVAR=0
             ;;
         4)
             echo
             stop_services
-            echo ""
-            echo "Press any key to continue"
-            read
-            ;;
+	    if [ $STATUSVAR -eq 0 ]
+	    then
+		    echo "$SERVICESTOPPEDMSG"
+		    echo "$CONTINMSG"
+		    read
+	    else
+		    echo ""
+	    fi
+	    STATUSVAR=0
+	    ;;
         5)
             echo
             systemctl
             echo ""
-            echo "Press any key to continue"
+            echo "$CONTINMSG"
             read
             ;;
         6)
@@ -141,7 +211,7 @@ function disable_services {
             journatlctl
             dmesg
             echo ""
-            echo "Press any key to continue"
+            echo "$CONTINMSG"
             read
             ;;
         7)
@@ -158,18 +228,16 @@ function disable_services {
             echo
             systemd-analyze blame
             echo ""
-            echo "Press any key to continue"
+            echo "$CONTINMSG"
             read
             ;;
         0)
             clear && exit
-            read
             ;;
         *)
-            echo -e "$RED Wrong option $NC"
-            echo "Wait and try again later..."
-            echo ""
-            sleep 3
+            echo -e "$ERRORMSG"
+	    echo "$TRYAGAINMSG"
+            read
             clear
             ;;
     esac
