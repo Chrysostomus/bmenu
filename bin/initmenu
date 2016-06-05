@@ -9,8 +9,8 @@ TEXTEDITOR=$EDITOR
 
 # Service messages section
 CONTINMSG="$BLUE Press any key to continue$NC"
-ERRORMSG="$RED Wrong option $NC"
-TRYAGAINMSG="Press any key and try again"
+ERRORMSG="$RED Wrong.$NC"
+TRYAGAINMSG="$RED Press any key and try again$NC"
 SELECTFILEMSG="Select file to configure and press Enter: "
 SELECTTARGETMSG="Select target and press Enter to change to: "
 SERVICEPREFIXMSG="Service "
@@ -135,6 +135,7 @@ function disable_services {
 
 }
 
+function main {
     while true; do
     clear
     echo ""
@@ -239,11 +240,12 @@ function disable_services {
             clear && exit
             ;;
         *)
-            echo -e "$ERRORMSG"
-	    echo -e "$TRYAGAINMSG"
+            echo -e "$ERRORMSG$TRYAGAINMSG"
             read -s -n1
             clear
             ;;
     esac
     done
-fi
+}
+
+main
