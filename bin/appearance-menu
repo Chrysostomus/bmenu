@@ -402,7 +402,7 @@ function main {
             clear && exit
             ;;
         *)
-			echo -e "$ERRORMSG$TRYAGAINMSG"
+	    echo -e "$ERRORMSG$TRYAGAINMSG"
             read -s -n1
             clear
             ;;
