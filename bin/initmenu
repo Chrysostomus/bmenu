@@ -10,7 +10,7 @@ TEXTEDITOR=$EDITOR
 # Service messages section
 CONTINMSG="$BLUE Press any key to continue$NC"
 ERRORMSG="$RED Wrong option $NC"
-TRYAGAINMSG="Press Enter and try again"
+TRYAGAINMSG="Press any key and try again"
 SELECTFILEMSG="Select file to configure and press Enter: "
 SELECTTARGETMSG="Select target and press Enter to change to: "
 SERVICEPREFIXMSG="Service "
