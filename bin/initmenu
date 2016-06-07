@@ -8,15 +8,18 @@ STATUSVAR=0
 TEXTEDITOR=$EDITOR
 
 # Service messages section
-CONTINMSG="Press any key to continue"
-ERRORMSG="$RED Wrong option $NC"
-TRYAGAINMSG="Press Enter and try again"
+CONTINMSG="$BLUE Press any key to continue$NC"
+ERRORMSG="$RED Wrong.$NC"
+TRYAGAINMSG="$RED Press any key and try again$NC"
 SELECTFILEMSG="Select file to configure and press Enter: "
 SELECTTARGETMSG="Select target and press Enter to change to: "
-SERVICESTARTEDMSG="Service was started successfully"
-SERVICEENABLEDMSG="Service was enabled successfully"
-SERVICESTOPPEDMSG="Service was stopped successfully"
-SERVICEDISABLEDMSG="Service was disabled successfully"
+SERVICEPREFIXMSG="Service "
+SERVICESTARTEDMSG=" was started successfully"
+SERVICEENABLEDMSG=" was enabled successfully"
+SERVICESTOPPEDMSG=" was stopped successfully"
+SERVICEDISABLEDMSG=" was disabled successfully"
+STARTTIMEMSG="$ORANGE      Start time$NC"
+BOOTSERVICEMSG="$ORANGE Boot service$NC"
 
 function config_editor {
 PS3="$SELECTFILEMSG"
@@ -132,6 +135,7 @@ function disable_services {
 
 }
 
+function main {
     while true; do
     clear
     echo ""
@@ -152,9 +156,9 @@ function disable_services {
             enable_services
 	    if [ $STATUSVAR -eq 0 ]
 	    then
-		    echo "$SERVICEENABLEDMSG"
-		    echo "$CONTINMSG"
-		    read
+		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEENABLEDMSG"
+		    echo -e "$CONTINMSG"
+		    read -s -n1
 	    else
 		    echo ""
 	    fi
@@ -165,9 +169,9 @@ function disable_services {
             disable_services
 	    if [ $STATUSVAR -eq 0 ]
 	    then
-		    echo "$SERVICEDISABLEDMSG"
-		    echo "$CONTINMSG"
-		    read
+		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEDISABLEDMSG"
+		    echo -e "$CONTINMSG"
+		    read -s -n1
 	    else
 		    echo ""
 	    fi
@@ -178,9 +182,9 @@ function disable_services {
             start_services
 	    if [ $STATUSVAR -eq 0 ]
 	    then
-		    echo "$SERVICESTARTEDMSG"
-		    echo "$CONTINMSG"
-		    read
+		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTARTEDMSG"
+		    echo -e "$CONTINMSG"
+		    read -s -n1
 	    else
 		    echo""
 	    fi
@@ -191,9 +195,9 @@ function disable_services {
             stop_services
 	    if [ $STATUSVAR -eq 0 ]
 	    then
-		    echo "$SERVICESTOPPEDMSG"
-		    echo "$CONTINMSG"
-		    read
+		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTOPPEDMSG"
+		    echo -e "$CONTINMSG"
+		    read -s -n1
 	    else
 		    echo ""
 	    fi
@@ -203,16 +207,15 @@ function disable_services {
             echo
             systemctl
             echo ""
-            echo "$CONTINMSG"
-            read
+            echo -e "$CONTINMSG"
+            read -s -n1
             ;;
         6)
             echo
-            journatlctl
             dmesg
             echo ""
-            echo "$CONTINMSG"
-            read
+            echo -e "$CONTINMSG"
+            read -s -n1
             ;;
         7)
             echo
@@ -226,20 +229,23 @@ function disable_services {
             ;;
         9)
             echo
+	    clear
+	    echo -e "$STARTTIMEMSG$BOOTSERVICEMSG"
             systemd-analyze blame
             echo ""
-            echo "$CONTINMSG"
-            read
+            echo -e "$CONTINMSG"
+            read -s -n1
             ;;
         0)
             clear && exit
             ;;
         *)
-            echo -e "$ERRORMSG"
-	    echo "$TRYAGAINMSG"
-            read
+            echo -e "$ERRORMSG$TRYAGAINMSG"
+            read -s -n1
             clear
             ;;
     esac
     done
-fi
+}
+
+main
