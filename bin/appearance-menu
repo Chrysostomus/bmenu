@@ -5,6 +5,8 @@ BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
 
+MINFONTSIZE=6
+MAXFONTSIZE=72
 STATUSVAR=0
 CANCELSTATUS=0
 SELECTEDITEM=""
@@ -29,7 +31,9 @@ ICONTHEMEPREFIXMSG="Icon theme "
 POINTERTHPREFIXMSG="Pointer theme "
 FONTSETPREFIXMSG="Font "
 FONTSIZESETMSG=" with size "
-INPUTFONTSIZEMSG="Input the size of the font:"
+FONTSIZEERRMSG="$RED Value is out of range$NC"
+SELECTEDFONTMSG="Selected font is: "
+INPUTFONTSIZEMSG="Input font size value in range from $MINFONTSIZE to $MAXFONTSIZE or just press Enter to discard changes"
 CHOOSEFONTPROMPTMSG="Choose new font to use"
 SETSUFFIXMSG=" was set successfully"
 TOGGLEDARKTHEMEMSG="Done"
@@ -99,6 +103,7 @@ function choose_gtk2_theme {
 	echo $AVAILABLETHEMESMSG
 	PS3=$PS31MSG
 	CANCELSTATUS=0
+	SELECTEDITEM=""
 	# Gather the results in an array.
 	gtk2_themes=($(find /usr/share/themes -type d -name "gtk-2.0" | awk -F'/' '{print $5}') "cancel")
 
@@ -138,6 +143,7 @@ function choose_gtk3_theme {
 	echo $AVAILABLETHEMESMSG
 	PS3=$PS32MSG
 	CANCELSTATUS=0
+	SELECTEDITEM=""
 	# Gather the results in an array.
 	gtk3_themes=($(find /usr/share/themes -type d -name "gtk-3.0" | awk -F'/' '{print $5}') "cancel")
 
@@ -178,6 +184,7 @@ function choose_icon_theme {
 	echo $AVAILABLETHEMESMSG
 	PS3=$PS33MSG
 	CANCELSTATUS=0
+	SELECTEDITEM=""
 	# Gather the results in an array.
 	icon_themes=($(find /usr/share/icons -type f -name "index.theme" | awk -F'/' '{print $5}') "cancel")
 
@@ -219,6 +226,7 @@ function choose_pointer_theme {
 	echo $AVAILABLETHEMESMSG
 	PS3=$PS34MSG
 	CANCELSTATUS=0
+	SELECTEDITEM=""
 	# Gather the results in an array.
 	pointer_themes=($(find /usr/share/icons -type d -name "cursors" | awk -F'/' '{print $5}' | sed 's/-Cursor//g') "cancel")
 
@@ -248,6 +256,41 @@ function choose_pointer_theme {
 	fi
 }
 
+function numberinput {
+	numberstring=""
+	schar=""
+	while true; do
+		read -s -n 1 schar
+		case $schar in
+		1|2|3|4|5|6|7|8|9|0)
+			numberstring+=$schar
+			echo -n "$schar"
+			;;
+		$'\0')
+			break
+			;;
+		$'\177')
+			numberstring="${numberstring%?}"
+			echo -n -e "\b"
+			echo -n " "
+			echo -n -e "\b"
+			;;
+		esac
+	done
+	number=`expr $numberstring + 0`
+	return 0
+}
+
+function checkfontsize {
+	value="$@"
+	if [ $value -lt $MINFONTSIZE ] || [ $value -gt $MAXFONTSIZE ]; then
+		return 1
+	else
+		return 0
+	fi
+
+}
+
 function set_font {
 	new_theme="$@"
 	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-font-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-font-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
@@ -256,16 +299,29 @@ function set_font {
 }
 
 function choose_font {
+	new_font=""
 	font_size=0
 	SELECTEDITEM=$(fc-list : family | tr , \\n | fzf -e --reverse --prompt="< $CHOOSEFONTPROMPTMSG >")
-	if [ $SELECTEDITEM != "" ]; then
-		new_font=$SELECTEDITEM
-    	echo $INPUTFONTSIZEMSG
-    	read font_size
-    	if [ $font_size -gt 0 ]; then
-    		set_font $new_font $font_size
+	if [ "$SELECTEDITEM" != "" ]; then
+		new_font="$SELECTEDITEM"
+		echo -e "$SELECTEDFONTMSG$SELECTEDITEM"
+		echo -e "$INPUTFONTSIZEMSG"
+    	numberinput
+    	font_size=$number
+ 		if [ $font_size -eq 0 ]; then
+ 			STATUSVAR=1
+ 			return $STATUSVAR
+ 		fi 			
+    	checkfontsize $font_size
+    	STATUSVAR=$?
+    	if [ $STATUSVAR -eq 1 ]; then
+    		echo ""
+    		echo -e "$ERRORMSG$FONTSIZEERRMSG"
+    		echo -e "$CONTINMSG"
+            read -s -n1
     	else
-    		STATUSVAR=1
+    		STATUSVAR=0
+    		set_font $new_font $font_size
     	fi
 	else
 		STATUSVAR=1
@@ -402,12 +458,12 @@ function main {
             clear && exit
             ;;
         *)
-	    echo -e "$ERRORMSG$TRYAGAINMSG"
-            read -s -n1
-            clear
-            ;;
-    esac
-    done
+			echo -e "$ERRORMSG$TRYAGAINMSG"
+			read -s -n1
+			clear
+			;;
+	esac
+	done
 }
 
 main
