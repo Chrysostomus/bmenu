@@ -101,7 +101,7 @@ function pressanykeyrequest {
 
 function set_gtk2_theme {
 	new_theme="$@"
-	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-theme-name" .gtkrc-2.0)/gtk-theme-name=\"$new_theme\"/g" .gtkrc-2.0
+	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-theme-name" $HOME/.gtkrc-2.0)/gtk-theme-name=\"$new_theme\"/g" $HOME/.gtkrc-2.0
 	STATUSVAR=$?
 	return $STATUSVAR
 }
