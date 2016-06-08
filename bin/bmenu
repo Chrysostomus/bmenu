@@ -4,6 +4,23 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
+
+# Service messages section
+ERRORMSG="$RED Wrong.$NC"
+TRYAGAINMSG="$RED Press any key and try again$NC"
+INSTALLINGRNG1MSG="Installing ranger to manage files"
+INSTALLINGRNG2MSG="Installing ranger to get a rifle"
+INSTALLINGTIMESETMSG="Installing timeset to manage time"
+INSTALLINGHTOPMSG="Installing htop to manage tasks"
+INSTALLINGBRANDRMSG="Installing brandr to manage display"
+INSTALLINGMHWDTUIMSG="Installing mhwd-tui to manage kernels and drivers"
+CLIFMNOTINSTMSG="No cli filemanager is installed and pacman seems to be in use"
+RIFLENOTINSTMSG="Rifle is not installed and pacman seems to be in use"
+TIMESETNOTINSTMSG="Timeset is not installed and pacman seems to be in use"
+CLIBROWSNOTINSTMSG="No cli browser installed and pacman seems to be in use"
+BRANDRNOTINSTMSG="Brandr is not installed and pacman seems to be in use"
+MHWDTUINOTINSTMSG="Mhwd-tui is not installed and pacman seems to be in use"
+
 if [ $(cat /proc/1/comm) = "systemd" ]; then
 	systemctl status NetworkManager.service | grep -q " active " && netcommand="nmtui"
 	systemctl status Netctl.service | grep -q " active " && netcommand="sudo wifi-menu"
@@ -11,15 +28,16 @@ else
 	rc-status | grep -q "NetworkManager" && netcommand="nmtui"
 	rc-status | grep -q "Netctl" && netcommand="sudo wifi-menu"
 fi
+
 function cli_filemanager {
 	if [ -e /usr/bin/ranger ]; then
 		ranger
 	elif [ -e /usr/bin/mc ]; then
 		mc
 	else
-		echo "Installing ranger to manage files"
+		echo "$INSTALLINGRNG1MSG"
 		if [ - e /var/lib/pacman/db.lck ]; then 
-			echo "No cli filemanager is installed and pacman seems to be in use"
+			echo "$CLIFMNOTINSTMSG"
 		else 
 			sudo pacman -Sy ranger && ranger
 		fi
@@ -30,9 +48,9 @@ function file_finder {
 	if [ -e /usr/bin/rifle ]; then
 		rifle $(find -type f | fzf -e --reverse)
 	else
-		echo "Installing ranger to get a rifle"
+		echo "$INSTALLINGRNG2MSG"
 		if [ - e /var/lib/pacman/db.lck ]; then 
-			echo "Rifle is not installed and pacman seems to be in use"
+			echo "$RIFLENOTINSTMSG"
 		else 
 			sudo pacman -Sy ranger && rifle $(find -type f | fzf -e --reverse)
 		fi
@@ -43,9 +61,9 @@ function manage_time {
 	if [ -e /usr/bin/timeset ]; then
 		sudo timeset
 	else
-		echo "Installing timeset to manage time"
+		echo "$INSTALLINGTIMESETMSG"
 		if [ -e /var/lib/pacman/db.lck ]; then 
-			echo "Timeset is not installed and pacman seems to be in use"
+			echo "$TIMESETNOTINSTMSG"
 		else 
 			sudo pacman -Sy timeset && sudo timeset
 		fi
@@ -63,39 +81,42 @@ function cli_browser {
 		lynx
 	else
 		if [ -e /var/lib/pacman/db.lck ]; then 
-			echo "no cli browser installed and pacman seems to be in use"
+			echo "$CLIBROWSNOTINSTMSG"
 		else 
 			sudo pacman -Sy elinks && elinks
 		fi
 	fi
 }
+
 function taskmanager {
 	if [ -e /usr/bin/htop ]; then
 		htop
 	else
-		echo "Installing htop to manage tasks"
+		echo "$INSTALLINGHTOPMSG"
 		sudo pacman -Sy htop && htop
 	fi
 }
+
 function display_settings {
 	if [ -e /usr/bin/brandr ]; then
 		brandr
 	else
-		echo "Installing brandr to manage display"
+		echo "$INSTALLINGBRANDRMSG"
 		if [ -e /var/lib/pacman/db.lck ]; then 
-			echo "Brandr is not installed and pacman seems to be in use"
+			echo "$BRANDRNOTINSTMSG"
 		else 
 			sudo pacman -Sy brandr && brandr
 		fi
 	fi
 }
+
 function hardware_settings {
 	if [ -e /usr/bin/mhwd-tui ]; then
 		mhwd-tui
 	else
-		echo "Installing mhwd-tui to manage kernels and drivers"
+		echo "$INSTALLINGMHWDTUIMSG"
 		if [ -e /var/lib/pacman/db.lck ]; then 
-			echo "Mhwd-tui is not installed and pacman seems to be in use"
+			echo "$MHWDTUINOTINSTMSG"
 		else 
 			sudo pacman -Sy mhwd-tui && mhwd-tui
 		fi
@@ -110,6 +131,7 @@ else
 fi
 }
 
+function main {
     while true; do
     clear
     echo ""
@@ -199,15 +221,14 @@ fi
             ;;
         0)
             clear && exit
-            read
             ;;
         *)
-            echo -e "$RED Wrong option $NC"
-            echo "Wait and try again later..."
-            echo ""
-            sleep 3
-            clear
+            echo -e "$ERRORMSG$TRYAGAINMSG"
+            read -s -n1
+	    clear
             ;;
     esac
     done
-fi
+}
+
+main
