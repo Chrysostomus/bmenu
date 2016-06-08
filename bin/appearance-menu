@@ -7,7 +7,7 @@ NC='\e[0m'
 
 MINFONTSIZE=6
 MAXFONTSIZE=72
-STATUSVAR=0
+STATUSVAR=1
 CANCELSTATUS=0
 SELECTEDITEM=""
 TEXTEDITOR=$EDITOR
@@ -93,10 +93,17 @@ Inherits=Adwaita
 EOL
 fi
 
+function pressanykeyrequest {
+	echo -e "$CONTINMSG"
+	read -s -n1
+	STATUSVAR=1
+}
+
 function set_gtk2_theme {
 	new_theme="$@"
 	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-theme-name" .gtkrc-2.0)/gtk-theme-name=\"$new_theme\"/g" .gtkrc-2.0
 	STATUSVAR=$?
+	return $STATUSVAR
 }
 
 function choose_gtk2_theme {
@@ -131,12 +138,14 @@ function choose_gtk2_theme {
     		picks=()
    	 	fi
 	fi
+	return $STATUSVAR
 }
 
 function set_gtk3_theme {
 	new_theme="$@"
 	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-theme-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-theme-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
 	STATUSVAR=$?
+	return $STATUSVAR
 }
 
 function choose_gtk3_theme {
@@ -169,8 +178,9 @@ function choose_gtk3_theme {
     		SELECTEDITEM="${picks[@]}"
     		set_gtk3_theme $SELECTEDITEM
     		picks=()
-    	fi
+    		fi
 	fi
+	return $STATUSVAR
 }
 
 function set_icon_theme {
@@ -178,6 +188,7 @@ function set_icon_theme {
 	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-icon-theme-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-icon-theme-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
 	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-icon-theme-name" $HOME/.gtkrc-2.0)/gtk-icon-theme-name=\"$new_theme\"/g" $HOME/.gtkrc-2.0	
 	STATUSVAR=$?
+	return $STATUSVAR
 }
 
 function choose_icon_theme {
@@ -210,8 +221,9 @@ function choose_icon_theme {
     		SELECTEDITEM="${picks[@]}"
     		set_icon_theme $SELECTEDITEM
     		picks=()
-    	fi
+    		fi
 	fi
+	return $STATUSVAR
 }
 
 function set_pointer_theme {
@@ -220,6 +232,7 @@ function set_pointer_theme {
 	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-cursor-theme-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-cursor-theme-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
 	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-cursor-theme-name" $HOME/.gtkrc-2.0)/gtk-cursor-theme-name=\"$new_theme\"/g" $HOME/.gtkrc-2.0
 	STATUSVAR=$?
+	return $STATUSVAR
 }
 
 function choose_pointer_theme {
@@ -252,8 +265,9 @@ function choose_pointer_theme {
     		SELECTEDITEM="${picks[@]}"
     		set_pointer_theme $SELECTEDITEM
     		picks=()
-    	fi
+    		fi
 	fi
+	return $STATUSVAR
 }
 
 function numberinput {
@@ -300,6 +314,7 @@ function set_font {
 	cp $HOME/.config/gtk-3.0/settings.ini $HOME/.config/gtk-3.0/settings.ini.bak && sed -i "s/$(grep "gtk-font-name" $HOME/.config/gtk-3.0/settings.ini)/gtk-font-name=$new_theme/g" $HOME/.config/gtk-3.0/settings.ini
 	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-font-name" $HOME/.gtkrc-2.0)/gtk-font-name=\"$new_theme\"/g" $HOME/.gtkrc-2.0	
 	STATUSVAR=$?
+	return $STATUSVAR
 }
 
 function choose_font {
@@ -321,8 +336,7 @@ function choose_font {
     	if [ $STATUSVAR -eq 1 ]; then
     		echo ""
     		echo -e "$ERRORMSG$FONTSIZEERRMSG"
-    		echo -e "$CONTINMSG"
-            read -s -n1
+    		pressanykeyrequest
     	else
     		STATUSVAR=0
     		set_font $new_font $font_size
@@ -330,18 +344,17 @@ function choose_font {
 	else
 		STATUSVAR=1
 	fi
+	return $STATUSVAR
 }
 
 function toggle_dark_theme {
 	grep -q "gtk-application-prefer-dark-theme=" $HOME/.config/gtk-3.0/settings.ini || echo "gtk-application-prefer-dark-theme=1" >> $HOME/.config/gtk-3.0/settings.ini
-	
 	STATUSVAR=$?
-	
 	grep -q "gtk-application-prefer-dark-theme=1" $HOME/.config/gtk-3.0/settings.ini && \
 	sed -i "s/gtk-application-prefer-dark-theme=1/gtk-application-prefer-dark-theme=0/g" $HOME/.config/gtk-3.0/settings.ini || \
 	sed -i "s/gtk-application-prefer-dark-theme=0/gtk-application-prefer-dark-theme=1/g" $HOME/.config/gtk-3.0/settings.ini
-	
 	STATUSVAR+=$?
+	return $STATUSVAR
 }
 
 function main {
@@ -362,85 +375,62 @@ function main {
     case $choix in
         1)
             echo
-            STATUSVAR=1
-            SELECTEDITEM=""
             choose_gtk2_theme
+            STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
             	echo ""
             	echo -e "$GTK2THEMEPREFIXMSG$SELECTEDITEM$SETSUFFIXMSG"
-            	echo -e "$CONTINMSG"
-            	read -s -n1
-            else
-            	echo ""
+            	pressanykeyrequest
             fi            	
             ;;
         2)
             echo
-            STATUSVAR=1
-            SELECTEDITEM=""
             choose_gtk3_theme
+            STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
             	echo ""
             	echo -e "$GTK3THEMEPREFIXMSG$SELECTEDITEM$SETSUFFIXMSG"
-            	echo -e "$CONTINMSG"
-            	read -s -n1
-            else
-            	echo ""
+            	pressanykeyrequest
             fi
             ;;
         3)
             echo
-            STATUSVAR=1
-            SELECTEDITEM=""
             choose_font
+            STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
             	echo ""
             	echo -e "$FONTSETPREFIXMSG$SELECTEDITEM$FONTSIZESETMSG$font_size$SETSUFFIXMSG"
-            	echo -e "$CONTINMSG"
-            	read -s -n1
-            else
-            	echo ""
+            	pressanykeyrequest
             fi
             ;;
         4)
             echo
-            STATUSVAR=1
-            SELECTEDITEM=""
             choose_icon_theme
+            STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
             	echo ""
             	echo -e "$ICONTHEMEPREFIXMSG$SELECTEDITEM$SETSUFFIXMSG"
-            	echo -e "$CONTINMSG"
-            	read -s -n1
-            else
-            	echo ""
+            	pressanykeyrequest
             fi
             ;;
         5)
             echo
-            STATUSVAR=1
             toggle_dark_theme
+            STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
             	echo ""
             	echo -e "$TOGGLEDARKTHEMEMSG"
-            	echo -e "$CONTINMSG"
-            	read -s -n1
-            else
-            	echo ""
+            	pressanykeyrequest
             fi
             ;;
         6)
             echo
-            STATUSVAR=1
-            SELECTEDITEM=""
             choose_pointer_theme
+            STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
             	echo ""
             	echo -e "$POINTERTHPREFIXMSG$SELECTEDITEM$SETSUFFIXMSG"
-            	echo -e "$CONTINMSG"
-            	read -s -n1
-            else
-            	echo ""
+            	pressanykeyrequest
             fi
             ;;
         7)
@@ -462,10 +452,10 @@ function main {
             clear && exit
             ;;
         *)
-			echo -e "$ERRORMSG$TRYAGAINMSG"
-			read -s -n1
-			clear
-			;;
+	    echo -e "$ERRORMSG$TRYAGAINMSG"
+	    read -s -n1
+	    clear
+	    ;;
 	esac
 	done
 }
