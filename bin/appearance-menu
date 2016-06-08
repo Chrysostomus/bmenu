@@ -33,7 +33,7 @@ FONTSETPREFIXMSG="Font "
 FONTSIZESETMSG=" with size "
 FONTSIZEERRMSG="$RED Value is out of range$NC"
 SELECTEDFONTMSG="Selected font is: "
-INPUTFONTSIZEMSG="Input font size value in range from $MINFONTSIZE to $MAXFONTSIZE or just press Enter to discard changes"
+INPUTFONTSIZEMSG="Input font size value in range from $MINFONTSIZE to $MAXFONTSIZE or just press Escape to discard changes"
 CHOOSEFONTPROMPTMSG="Choose new font to use"
 SETSUFFIXMSG=" was set successfully"
 TOGGLEDARKTHEMEMSG="Done"
@@ -274,6 +274,10 @@ function numberinput {
 			echo -n -e "\b"
 			echo -n " "
 			echo -n -e "\b"
+			;;
+		$'\e')
+			numberstring="0"
+			break
 			;;
 		esac
 	done
