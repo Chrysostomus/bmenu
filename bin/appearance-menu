@@ -273,6 +273,7 @@ function choose_pointer_theme {
 function numberinput {
 	numberstring=""
 	schar=""
+	number=0
 	while true; do
 		read -s -n 1 schar
 		case $schar in
