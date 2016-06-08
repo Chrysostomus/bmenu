@@ -321,7 +321,7 @@ function set_font {
 function choose_font {
 	new_font=""
 	font_size=0
-	SELECTEDITEM=$(fc-list : family | tr , \\n | fzf -e --reverse --prompt="< $CHOOSEFONTPROMPTMSG >")
+	SELECTEDITEM=$(fc-list : family | tr , \\n | sort | uniq | fzf -e --reverse --prompt="< $CHOOSEFONTPROMPTMSG >")
 	if [ "$SELECTEDITEM" != "" ]; then
 		new_font="$SELECTEDITEM"
 		echo -e "$SELECTEDFONTMSG$SELECTEDITEM"
