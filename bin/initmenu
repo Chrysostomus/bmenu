@@ -4,7 +4,7 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
-STATUSVAR=0
+STATUSVAR=1
 TEXTEDITOR=$EDITOR
 
 # Service messages section
@@ -18,8 +18,12 @@ SERVICESTARTEDMSG=" was started successfully"
 SERVICEENABLEDMSG=" was enabled successfully"
 SERVICESTOPPEDMSG=" was stopped successfully"
 SERVICEDISABLEDMSG=" was disabled successfully"
-STARTTIMEMSG="$ORANGE      Start time$NC"
-BOOTSERVICEMSG="$ORANGE Boot service$NC"
+
+function pressanykeyrequest {
+	echo -e "$CONTINMSG"
+	read -s -n1
+	STATUSVAR=1
+}
 
 function config_editor {
 PS3="$SELECTFILEMSG"
@@ -48,7 +52,8 @@ do
 			break
 	esac
 done
-	
+STATUSVAR=0
+return $STATUSVAR
 }
 
 function change_runlevel {
@@ -82,57 +87,56 @@ do
 			break
 	esac
 done
-	
-	
+STATUSVAR=0
+return $STATUSVAR	
 }
 
 function enable_services {
 	OUTPUTITEM=""
 	OUTPUTITEM=$(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]
-	then
+	if [ "$OUTPUTITEM" != "" ]; then
 		sudo systemctl enable $OUTPUTITEM
 		STATUSVAR=$?
 	else
 		STATUSVAR=1
 	fi
+return $STATUSVAR
 }
 
 function start_services {
 	OUTPUTITEM=""
 	OUTPUTITEM=$(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]
-	then
+	if [ "$OUTPUTITEM" != "" ]; then
 		sudo systemctl start $OUTPUTITEM
 		STATUSVAR=$?
 	else
 		STATUSVAR=1
 	fi
+return $STATUSVAR
 }
 
 function stop_services {
 	OUTPUTITEM=""
 	OUTPUTITEM=$(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]
-	then
+	if [ "$OUTPUTITEM" != "" ]; then
 		sudo systemctl stop $OUTPUTITEM
 		STATUSVAR=$?
 	else
 		STATUSVAR=1
 	fi
+return $STATUSVAR
 }
 
 function disable_services {
 	OUTPUTITEM=""
 	OUTPUTITEM=$(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]
-	then
+	if [ "$OUTPUTITEM" != "" ]; then
 		sudo systemctl disable $OUTPUTITEM
 		STATUSVAR=$?
 	else
 		STATUSVAR=1
 	fi
-
+return $STATUSVAR
 }
 
 function main {
@@ -154,68 +158,50 @@ function main {
         1)
             echo
             enable_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEENABLEDMSG"
-		    echo -e "$CONTINMSG"
-		    read -s -n1
-	    else
-		    echo ""
+            STATUSVAR=$?
+	    if [ $STATUSVAR -eq 0 ]; then
+		echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEENABLEDMSG"
+		pressanykeyrequest
 	    fi
-	    STATUSVAR=0
             ;;
         2)
             echo
             disable_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEDISABLEDMSG"
-		    echo -e "$CONTINMSG"
-		    read -s -n1
-	    else
-		    echo ""
+            STATUSVAR=$?
+	    if [ $STATUSVAR -eq 0 ]; then
+	    	echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEDISABLEDMSG"
+	    	pressanykeyrequest
 	    fi
-	    STATUSVAR=0
             ;;
         3)
             echo
             start_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTARTEDMSG"
-		    echo -e "$CONTINMSG"
-		    read -s -n1
-	    else
-		    echo""
+            STATUSVAR=$?
+	    if [ $STATUSVAR -eq 0 ]; then
+		echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTARTEDMSG"
+		pressanykeyrequest
 	    fi
-	    STATUSVAR=0
             ;;
         4)
             echo
             stop_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTOPPEDMSG"
-		    echo -e "$CONTINMSG"
-		    read -s -n1
-	    else
-		    echo ""
+            STATUSVAR=$?
+	    if [ $STATUSVAR -eq 0 ]; then
+		echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTOPPEDMSG"
+		pressanykeyrequest
 	    fi
-	    STATUSVAR=0
 	    ;;
         5)
             echo
             systemctl
             echo ""
-            echo -e "$CONTINMSG"
-            read -s -n1
+            pressanykeyrequest
             ;;
         6)
             echo
             dmesg
             echo ""
-            echo -e "$CONTINMSG"
-            read -s -n1
+            pressanykeyrequest
             ;;
         7)
             echo
@@ -230,11 +216,9 @@ function main {
         9)
             echo
 	    clear
-	    echo -e "$STARTTIMEMSG$BOOTSERVICEMSG"
             systemd-analyze blame
             echo ""
-            echo -e "$CONTINMSG"
-            read -s -n1
+            pressanykeyrequest
             ;;
         0)
             clear && exit
