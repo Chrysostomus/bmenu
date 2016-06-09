@@ -4,30 +4,45 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
+TEXTEDITOR=$EDITOR
+STATUSVAR=1
+
+# Service messages section
+ERRORMSG="$RED Wrong.$NC"
+TRYAGAINMSG="$RED Press any key and try again$NC"
+PS3SYSSETTMSG="Select bootloader to configure: "
+CONTINMSG="$BLUE Press any key to continue$NC"
+
+function pressanykeyrequest {
+	echo -e "$CONTINMSG"
+	read -s -n1
+	STATUSVAR=1
+}
+
 function bootloader_configuration {
-PS3="Select bootloader to configure: "
+PS3="$PS3SYSSETTMSG"
 # Gather the results in an array.
-dms=("grub" "refind" "systemdboot" "syslinux")
+dms=("grub" "refind" "systemdboot" "syslinux" "cancel")
 
 select pick in "${dms[@]}"
 do
 	case $pick in
 		grub)
-			sudo nano /etc/default/grub
+			sudo $TEXTEDITOR /etc/default/grub
 			sudo update-grub
 			break
 			;;		
 		refind)
-			sudo nano /boot/refind_linux.conf
-			sudo nano /boot/EFI/refind/refind.conf
+			sudo $TEXTEDITOR /boot/refind_linux.conf
+			sudo $TEXTEDITOR /boot/EFI/refind/refind.conf
 			break
 			;;		
 		systemdboot)
-			sudo nano /boot/loader/entries/manjaro.conf
+			sudo $TEXTEDITOR /boot/loader/entries/manjaro.conf
 			break
 			;;		
 		syslinux)
-			sudo nano /boot/syslinux/syslinux.cfg
+			sudo $TEXTEDITOR /boot/syslinux/syslinux.cfg
 			break
 			;;		
 		cancel)
@@ -36,6 +51,7 @@ do
 done
 }
 
+function main {
     while true; do
     clear
     echo ""
@@ -53,27 +69,31 @@ done
     case $choix in
         1)
             echo
-            sudo nano /etc/pacman.conf
+            sudo $TEXTEDITOR /etc/pacman.conf
             echo ""
             ;;
         2)
             echo
-            sudo nano /etc/mkinitcpio.conf
+            sudo $TEXTEDITOR /etc/mkinitcpio.conf
             echo ""
             ;;
         3)
             echo
-            sudo nano /etc/fstab
+            sudo $TEXTEDITOR /etc/fstab
             echo ""
             ;;
         4)
             echo
             sudo visudo
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 1 ]; then
+            	pressanykeyrequest
+            fi
             echo ""
             ;;
         5)
             echo
-            sudo nano /etc/systemd/logind.conf
+            sudo $TEXTEDITOR /etc/systemd/logind.conf
             echo ""
             ;;
         6)
@@ -83,12 +103,12 @@ done
             ;;
         7)
             echo
-            sudo nano /etc/udevil/udevil.conf
+            sudo $TEXTEDITOR /etc/udevil/udevil.conf
             echo ""
             ;;
         8)
             echo
-            nano ~/.xinitrc
+            $TEXTEDITOR ~/.xinitrc
             echo ""
             ;;
         9)
@@ -98,15 +118,14 @@ done
             ;;
         0)
             clear && exit
-            read
             ;;
         *)
-            echo -e "$RED Wrong option $NC"
-            echo "Wait and try again later..."
-            echo ""
-            sleep 3
-            clear
+            echo -e "$ERRORMSG$TRYAGAINMSG"
+            read -s -n1
+	    clear
             ;;
     esac
     done
-fi
+}
+
+main
