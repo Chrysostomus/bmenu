@@ -281,16 +281,16 @@ function numberinput {
 			numberstring+=$schar
 			echo -n "$schar"
 			;;
-		$'\0')
+		$'\n')	 #Enter
 			break
 			;;
-		$'\177')
+		$'\177') #Backspace
 			numberstring="${numberstring%?}"
 			echo -n -e "\b"
 			echo -n " "
 			echo -n -e "\b"
 			;;
-		$'\e')
+		$'\e')   #Escape
 			numberstring="0"
 			break
 			;;
