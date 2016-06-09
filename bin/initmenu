@@ -4,7 +4,7 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
-STATUSVAR=1
+STATUSVAR=0
 TEXTEDITOR=$EDITOR
 
 # Service messages section
@@ -18,12 +18,8 @@ SERVICESTARTEDMSG=" was started successfully"
 SERVICEENABLEDMSG=" was enabled successfully"
 SERVICESTOPPEDMSG=" was stopped successfully"
 SERVICEDISABLEDMSG=" was disabled successfully"
-
-function pressanykeyrequest {
-	echo -e "$CONTINMSG"
-	read -s -n1
-	STATUSVAR=1
-}
+STARTTIMEMSG="$ORANGE      Start time$NC"
+BOOTSERVICEMSG="$ORANGE Boot service$NC"
 
 function config_editor {
 PS3="$SELECTFILEMSG"
@@ -33,27 +29,38 @@ select pick in "${configs[@]}"
 do
 	case $pick in
 		logind.conf)
-			sudo $TEXTEDITOR /etc/systemd/logind.conf 
+			[ -e /etc/systemd/logind.conf.d/10-logind.conf ] || \
+			sudo mkdir -p /etc/systemd/logind.conf.d/ && \
+			sudo cp /etc/systemd/logind.conf /etc/systemd/logind.conf.d/10-logind.conf && \
+			sudo $TEXTEDITOR /etc/systemd/logind.conf.d/10-logind.conf 
 			break
 			;;		
 		system.conf)
-			sudo $TEXTEDITOR /etc/systemd/system.conf
+			[ -e /etc/systemd/system.conf.d/10-system.conf ] || \
+			sudo mkdir -p /etc/systemd/system.conf.d/ && \
+			sudo cp /etc/systemd/system.conf /etc/systemd/system.conf.d/10-logind.conf && \
+			sudo $TEXTEDITOR /etc/systemd/system.conf.d/10-system.conf
 			break
 			;;		
 		journald.conf)
-			sudo $TEXTEDITOR /etc/systemd/journald.conf
+			[ -e /etc/systemd/journald.conf.d/10-journald.conf ] || \
+			sudo mkdir -p /etc/systemd/journald.conf.d/ && \
+			sudo cp /etc/systemd/journald.conf /etc/systemd/journald.conf.d/10-journald.conf && \
+			sudo $TEXTEDITOR /etc/systemd/journald.conf.d/10-journald.conf
 			break
 			;;		
 		user.conf)
-			sudo $TEXTEDITOR /etc/systemd/user.conf
+			[ -e /etc/systemd/user.conf.d/10-user.conf ] || \
+			sudo mkdir -p /etc/systemd/user.conf.d/ && \
+			sudo cp /etc/systemd/user.conf /etc/systemd/user.conf.d/10-user.conf && \
+			sudo $TEXTEDITOR /etc/systemd/user.conf.d/10-user.conf
 			break
 			;;		
 		cancel)
 			break
 	esac
 done
-STATUSVAR=0
-return $STATUSVAR
+	
 }
 
 function change_runlevel {
@@ -87,56 +94,57 @@ do
 			break
 	esac
 done
-STATUSVAR=0
-return $STATUSVAR	
+	
+	
 }
 
 function enable_services {
 	OUTPUTITEM=""
 	OUTPUTITEM=$(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]; then
+	if [ "$OUTPUTITEM" != "" ]
+	then
 		sudo systemctl enable $OUTPUTITEM
 		STATUSVAR=$?
 	else
 		STATUSVAR=1
 	fi
-return $STATUSVAR
 }
 
 function start_services {
 	OUTPUTITEM=""
 	OUTPUTITEM=$(systemctl list-unit-files | awk '/disabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]; then
+	if [ "$OUTPUTITEM" != "" ]
+	then
 		sudo systemctl start $OUTPUTITEM
 		STATUSVAR=$?
 	else
 		STATUSVAR=1
 	fi
-return $STATUSVAR
 }
 
 function stop_services {
 	OUTPUTITEM=""
 	OUTPUTITEM=$(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]; then
+	if [ "$OUTPUTITEM" != "" ]
+	then
 		sudo systemctl stop $OUTPUTITEM
 		STATUSVAR=$?
 	else
 		STATUSVAR=1
 	fi
-return $STATUSVAR
 }
 
 function disable_services {
 	OUTPUTITEM=""
 	OUTPUTITEM=$(systemctl list-unit-files | awk '/enabled/ {print $1}' | fzf -m -e --reverse)
-	if [ "$OUTPUTITEM" != "" ]; then
+	if [ "$OUTPUTITEM" != "" ]
+	then
 		sudo systemctl disable $OUTPUTITEM
 		STATUSVAR=$?
 	else
 		STATUSVAR=1
 	fi
-return $STATUSVAR
+
 }
 
 function main {
@@ -158,50 +166,68 @@ function main {
         1)
             echo
             enable_services
-            STATUSVAR=$?
-	    if [ $STATUSVAR -eq 0 ]; then
-		echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEENABLEDMSG"
-		pressanykeyrequest
+	    if [ $STATUSVAR -eq 0 ]
+	    then
+		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEENABLEDMSG"
+		    echo -e "$CONTINMSG"
+		    read -s -n1
+	    else
+		    echo ""
 	    fi
+	    STATUSVAR=0
             ;;
         2)
             echo
             disable_services
-            STATUSVAR=$?
-	    if [ $STATUSVAR -eq 0 ]; then
-	    	echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEDISABLEDMSG"
-	    	pressanykeyrequest
+	    if [ $STATUSVAR -eq 0 ]
+	    then
+		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEDISABLEDMSG"
+		    echo -e "$CONTINMSG"
+		    read -s -n1
+	    else
+		    echo ""
 	    fi
+	    STATUSVAR=0
             ;;
         3)
             echo
             start_services
-            STATUSVAR=$?
-	    if [ $STATUSVAR -eq 0 ]; then
-		echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTARTEDMSG"
-		pressanykeyrequest
+	    if [ $STATUSVAR -eq 0 ]
+	    then
+		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTARTEDMSG"
+		    echo -e "$CONTINMSG"
+		    read -s -n1
+	    else
+		    echo""
 	    fi
+	    STATUSVAR=0
             ;;
         4)
             echo
             stop_services
-            STATUSVAR=$?
-	    if [ $STATUSVAR -eq 0 ]; then
-		echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTOPPEDMSG"
-		pressanykeyrequest
+	    if [ $STATUSVAR -eq 0 ]
+	    then
+		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTOPPEDMSG"
+		    echo -e "$CONTINMSG"
+		    read -s -n1
+	    else
+		    echo ""
 	    fi
+	    STATUSVAR=0
 	    ;;
         5)
             echo
             systemctl
             echo ""
-            pressanykeyrequest
+            echo -e "$CONTINMSG"
+            read -s -n1
             ;;
         6)
             echo
             dmesg
             echo ""
-            pressanykeyrequest
+            echo -e "$CONTINMSG"
+            read -s -n1
             ;;
         7)
             echo
@@ -216,9 +242,11 @@ function main {
         9)
             echo
 	    clear
+	    echo -e "$STARTTIMEMSG$BOOTSERVICEMSG"
             systemd-analyze blame
             echo ""
-            pressanykeyrequest
+            echo -e "$CONTINMSG"
+            read -s -n1
             ;;
         0)
             clear && exit
