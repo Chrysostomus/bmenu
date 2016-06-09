@@ -198,7 +198,7 @@ esac
 function dm_detect {
 if [ $(cat /proc/1/comm) = "systemd" ]; then
 	for displaymanager in kdm gdm sddm lightdm lxdm slim; do
-		systemctl status $displaymanager.service | grep -q enabled && echo $displaymanager
+		systemctl cat display-manager.service | awk -F'/' '/^Exec/ {print $NF}'
 	done
 else
 	grep 'DISPLAYMANAGER=' /etc/conf.d/xdm | cut -d \" -f 2
@@ -244,7 +244,7 @@ function autologger {
 		sddm)
 			sudo sddm --example-config > /etc/sddm.conf
 			sudo sed -i "s/^User=/User=$user/g" /etc/sddm.conf
-			sudo sed -i "s/^Session/Session=$session/g" /etc/slim.conf
+			sudo sed -i "s/^Session/Session=$session/g" /etc/sddm.conf
 			break
 			;;		
 		mdm)
