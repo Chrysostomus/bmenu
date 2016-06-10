@@ -281,7 +281,7 @@ function numberinput {
 			numberstring+=$schar
 			echo -n "$schar"
 			;;
-		$'\n')	 #Enter
+		$'\000') #Enter
 			break
 			;;
 		$'\177') #Backspace
