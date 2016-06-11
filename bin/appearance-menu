@@ -34,6 +34,7 @@ FONTSIZESETMSG=" with size "
 FONTSIZEERRMSG="$RED Value is out of range$NC"
 SELECTEDFONTMSG="Selected font is: "
 INPUTFONTSIZEMSG="Input font size value in range from $MINFONTSIZE to $MAXFONTSIZE or just press Escape to discard changes"
+SELECTFONTSIZEMSG="Select font size value"
 CHOOSEFONTPROMPTMSG="Choose new font to use"
 SETSUFFIXMSG=" was set successfully"
 TOGGLEDARKTHEMEMSG="Done"
@@ -270,10 +271,45 @@ function choose_pointer_theme {
 	return $STATUSVAR
 }
 
-function numberinput {
+function numberinputprocedure {
+	font_family=$SELECTEDITEM
 	numberstring=""
-	schar=""
 	number=0
+	schar=""
+	# This function checks font family and tries to find
+	# fonts with fixed pixel size value using fc-cat command.
+	# fc-cat output is huge and can be used in other procedures. 
+	# If we found nothing user should enter font size manually
+	# because selected font is a size scalable one.
+	# If we found pixelsize items for selected font 
+	# user selects size in range of these items.
+	fccatmsggrep=""
+	fccatmsggrep=$(fc-cat -r 2> /dev/null | grep "\"$SELECTEDITEM" | grep -o "pixelsize=[0-9][0-9]*" | grep -o "[0-9][0-9]*")
+	if [ "$fccatmsggrep" != "" ]; then
+		numberstring=$(echo "$fccatmsggrep" | sort -n | uniq | fzf -e --reverse --prompt="< $SELECTFONTSIZEMSG >")
+		if [ "$numberstring" == "" ]; then
+			number=0
+			return 1
+		else
+			number=`expr $numberstring + 0`
+			return 0
+		fi
+	else
+		echo -e "$INPUTFONTSIZEMSG"
+    	manualnumberinput
+    	checkfontsize $number
+    	STATUSVAR=$?
+    	if [ $STATUSVAR -eq 1 ]; then
+    		echo ""
+    		echo -e "$ERRORMSG$FONTSIZEERRMSG"
+    		pressanykeyrequest
+    		return 1
+    	fi
+    	return 0
+    fi
+}
+
+function manualnumberinput {
 	while true; do
 		read -s -n 1 schar
 		case $schar in
@@ -325,26 +361,17 @@ function choose_font {
 	if [ "$SELECTEDITEM" != "" ]; then
 		new_font="$SELECTEDITEM"
 		echo -e "$SELECTEDFONTMSG$SELECTEDITEM"
-		echo -e "$INPUTFONTSIZEMSG"
-    	numberinput
-    	font_size=$number
- 		if [ $font_size -eq 0 ]; then
- 			STATUSVAR=1
- 			return $STATUSVAR
- 		fi 			
-    	checkfontsize $font_size
-    	STATUSVAR=$?
-    	if [ $STATUSVAR -eq 1 ]; then
-    		echo ""
-    		echo -e "$ERRORMSG$FONTSIZEERRMSG"
-    		pressanykeyrequest
-    	else
-    		STATUSVAR=0
-    		set_font $new_font $font_size
-    	fi
-	else
-		STATUSVAR=1
+		numberinputprocedure
+		STATUSVAR=$?
+		if [ $STATUSVAR -eq 1 ]; then
+			return $STATUSVAR
+		else
+			font_size=$number			
+			set_font $new_font $font_size
+			return $STATUSVAR
+		fi
 	fi
+	STATUSVAR=1
 	return $STATUSVAR
 }
 
