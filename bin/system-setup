@@ -354,6 +354,7 @@ function autologger {
 			;;		
 		sddm)
 			session=$(choose_session)
+			STATUSVAR=$?
 			if [ $STATUSVAR -eq 1 ]; then
 				return $STATUSVAR
 			fi
