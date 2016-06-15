@@ -317,6 +317,7 @@ do
 	case $pick in
 		*)
 			echo $pick
+			STATUSVAR=0
 			break
 			;;			
 		cancel)
@@ -324,6 +325,7 @@ do
 			break
 	esac
 done
+return $STATUSVAR
 }
 
 function autologger {
@@ -333,10 +335,6 @@ function autologger {
 		return $STATUSVAR
 	fi
 	dm=$(dm_detect)
-	session=$(choose_session)
-	if [ $STATUSVAR -eq 1 ]; then
-		return $STATUSVAR
-	fi
 	eval user=$(whoami)
 	case dm in 
 		slim)
@@ -355,7 +353,8 @@ function autologger {
 			break
 			;;		
 		sddm)
-			if [ "$session" == "" ]; then
+			session=$(choose_session)
+			if [ $STATUSVAR -eq 1 ]; then
 				return $STATUSVAR
 			fi
 			sudo sddm --example-config > /etc/sddm.conf
@@ -505,9 +504,9 @@ function main {
             ;;
         *)
             echo -e "$ERRORMSG$TRYAGAINMSG"
-		    read -s -n1
-		    clear
-			;;
+	    read -s -n1
+	    clear
+	    ;;
     esac
     done
 }
