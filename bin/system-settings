@@ -53,14 +53,11 @@ done
 }
 
 function tryvisudo {
-	visudoerrormsggrep=""
 	visudoerrormsggrep=$(sudo visudo 2>&1 | grep "no editor found")
 	if [ "$visudoerrormsggrep" != "" ]; then
 		echo "$USINGNANOFOREDITMSG"
 		sudo EDITOR=nano visudo
 		return 0
-	else
-		pressanykeyrequest
 	fi
 	return 1
 }
@@ -111,8 +108,6 @@ function main {
             			if [ $STATUSVAR -eq 0 ]; then
             				pressanykeyrequest
             			fi
-            	else
-            		pressanykeyrequest
             	fi
             fi
             echo ""
