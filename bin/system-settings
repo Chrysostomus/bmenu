@@ -12,6 +12,7 @@ ERRORMSG="$RED Wrong.$NC"
 TRYAGAINMSG="$RED Press any key and try again$NC"
 PS3SYSSETTMSG="Select bootloader to configure: "
 CONTINMSG="$BLUE Press any key to continue$NC"
+USINGNANOFOREDITMSG="Using nano for edit..."
 
 function pressanykeyrequest {
 	echo -e "$CONTINMSG"
@@ -51,6 +52,16 @@ do
 done
 }
 
+function tryvisudo {
+	visudoerrormsggrep=$(sudo visudo 2>&1 | grep "no editor found")
+	if [ "$visudoerrormsggrep" != "" ]; then
+		echo "$USINGNANOFOREDITMSG"
+		sudo EDITOR=nano visudo
+		return 0
+	fi
+	return 1
+}
+
 function main {
     while true; do
     clear
@@ -84,10 +95,20 @@ function main {
             ;;
         4)
             echo
-            sudo visudo
+            sudo echo ""
             STATUSVAR=$?
             if [ $STATUSVAR -eq 1 ]; then
-            	pressanykeyrequest
+             echo ""
+            else
+            	sudo visudo
+            	STATUSVAR=$?
+            	if [ $STATUSVAR -eq 1 ]; then
+            		tryvisudo
+            		STATUSVAR=$?
+            			if [ $STATUSVAR -eq 0 ]; then
+            				pressanykeyrequest
+            			fi
+            	fi
             fi
             echo ""
             ;;
