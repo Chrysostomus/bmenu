@@ -7,6 +7,7 @@ NC='\e[0m'
 
 STATUSVAR=1
 TEXTEDITOR=$EDITOR
+SELECTEDITEM=""
 
 # Service messages section
 CONTINMSG="$BLUE Press any key to continue$NC"
@@ -27,8 +28,8 @@ NOSUPPORTAUTOLOGINMSG="No support for setting up autologin without displaymanage
 GDMWONTWORKMSG="gdm will not work with openrc"
 CURRENTSHELLMSG="Your current shell is $(echo $SHELL)"
 SETSUFFIXMSG=" was set successfully"
-SHELLPREFIXMSG="Shell"
-DISPLAYMGRPREFIXMSG="Display manager"
+SHELLPREFIXMSG="Shell "
+DISPLAYMGRPREFIXMSG="Display manager "
 AUTOLOGGERRPREFIXMSG="Autologger"
 HIBERNATIONPREFIXMSG="Hibernation"
 AURSUPPORTPREFIXMSG="AUR support"
@@ -42,6 +43,7 @@ function pressanykeyrequest {
 
 function shell_chooser {
 PS3="$PS3SHELLCHOOSMSG"
+SELECTEDITEM=""
 # Gather the results in an array.
 shells=("zsh" "bash" "fish" "dash" "cancel")
 
@@ -65,6 +67,7 @@ do
 			echo ""
 			echo ""
 			chsh -s /usr/bin/zsh
+			SELECTEDITEM="$pick"
 			break
 			;;		
 		bash)
@@ -80,6 +83,7 @@ do
 			fi
 			echo ""
 			chsh -s /bin/bash
+			SELECTEDITEM="$pick"
 			break
 			;;		
 		fish)
@@ -94,7 +98,7 @@ do
 				return $STATUSVAR
 			fi
 			chsh -s /usr/bin/fish
-			echo ""
+			SELECTEDITEM="$pick"
 			break
 			;;		
 		dash)
@@ -107,6 +111,7 @@ do
 				return $STATUSVAR
 			fi
 			chsh -s /usr/dash
+			SELECTEDITEM="$pick"
 			break
 			;;		
 		cancel)
@@ -118,6 +123,7 @@ return $STATUSVAR
 
 function displaymanager {
 PS3="$PS3DISPLAYMNGMSG"
+SELECTEDITEM=""
 # Gather the results in an array.
 dms=("lightdm" "kdm" "gdm" "lxdm" "mdm" "slim" "sddm" "cancel")
 sudo echo ""
@@ -129,6 +135,7 @@ select pick in "${dms[@]}"
 do
 	case $pick in
 		slim)
+			SELECTEDITEM="$pick"
 			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy slim slim-themes && sudo systemctl enable slim.service -f
 			STATUSVAR=$?
@@ -144,6 +151,7 @@ do
 			break
 			;;		
 		lightdm)
+			SELECTEDITEM="$pick"
 			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy lightdm lightdm-another-gtk-greeter lightdm-another-gtk-greeter-themes accountsservice \
 			&& sudo systemctl enable lightdm.service -f && sudo systemctl enable accounts-daemon && \
@@ -163,6 +171,7 @@ do
 			break
 			;;		
 		sddm)
+			SELECTEDITEM="$pick"
 			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy sddm && sudo systemctl enable sddm.service -f
 			STATUSVAR=$?
@@ -181,6 +190,7 @@ do
 			break
 			;;		
 		mdm)
+			SELECTEDITEM="$pick"
 			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy mdm && sudo systemctl enable mdm.service -f
 			STATUSVAR=$?
@@ -196,6 +206,7 @@ do
 			break
 			;;		
 		lxdm)
+			SELECTEDITEM="$pick"
 			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy lxdm && sudo systemctl enable lxdm.service -f
 			STATUSVAR=$?
@@ -206,6 +217,7 @@ do
 			break
 			;;		
 		gdm)
+			SELECTEDITEM="$pick"
 			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy gdm3setup && sudo systemctl enable gdm.service -f
 			STATUSVAR=$?
@@ -216,6 +228,7 @@ do
 			break
 			;;		
 		kdm)
+			SELECTEDITEM="$pick"
 			if ! [[ -d /run/openrc ]] ; then
 			sudo pacman -Sy kdebase-workspace archlinux-themes-kdm && sudo systemctl enable kdm.service -f
 			STATUSVAR=$?
@@ -333,10 +346,6 @@ function autologger {
 		return $STATUSVAR
 	fi
 	dm=$(dm_detect)
-	session=$(choose_session)
-	if [ $STATUSVAR -eq 1 ]; then
-		return $STATUSVAR
-	fi
 	eval user=$(whoami)
 	case dm in 
 		slim)
@@ -355,8 +364,9 @@ function autologger {
 			break
 			;;		
 		sddm)
-			if [ "$session" == "" ]; then
-				return $STATUSVAR
+			session=$(choose_session)
+			if [ $STATUSVAR -eq 1 ] || [ "$session" == "" ]; then
+				return 1
 			fi
 			sudo sddm --example-config > /etc/sddm.conf
 			sudo sed -i "s/^User=/User=$user/g" /etc/sddm.conf
@@ -414,9 +424,9 @@ function main {
     echo ""
     echo -e "                            ::Setup:: "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
-    echo -e " │    1   Enable hibernation        2   Choose Display manager │"
+    echo -e " │    1   Enable hibernation        2   Install Display manager│"
     echo -e " │    3   Enable autologin          4   Install AUR support    │"
-    echo -e " │    5   Choose shell              6   Disk utility           │"    
+    echo -e " │    5   Install shell             6   Disk utility           │"    
     echo -e " │    7   Install printer support   8   Recover files          │"
     echo -e " └─────────────────────────────────────────────────────────────┘"
     echo -e "          Select an item     -      0   Exit "
@@ -440,7 +450,7 @@ function main {
             STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
             	echo ""
-            	echo -e "$DISPLAYMGRPREFIXMSG$SETSUFFIXMSG"
+            	echo -e "$DISPLAYMGRPREFIXMSG$SELECTEDITEM$SETSUFFIXMSG"
             	pressanykeyrequest
             fi
             echo ""
@@ -474,7 +484,7 @@ function main {
             STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
             	echo ""
-            	echo -e "$SHELLPREFIXMSG$SETSUFFIXMSG"
+            	echo -e "$SHELLPREFIXMSG$SELECTEDITEM$SETSUFFIXMSG"
             	pressanykeyrequest
             fi
             echo ""

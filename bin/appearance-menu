@@ -272,7 +272,7 @@ function choose_pointer_theme {
 }
 
 function numberinputprocedure {
-	font_family=$SELECTEDITEM
+	font_family="$SELECTEDITEM"
 	numberstring=""
 	number=0
 	schar=""
@@ -284,7 +284,7 @@ function numberinputprocedure {
 	# If we found pixelsize items for selected font 
 	# user selects size in range of these items.
 	fccatmsggrep=""
-	fccatmsggrep=$(fc-cat -r 2> /dev/null | grep "\"$SELECTEDITEM" | grep -o "pixelsize=[0-9][0-9]*" | grep -o "[0-9][0-9]*")
+	fccatmsggrep=$(fc-cat -r 2> /dev/null | grep "\"$font_family" | grep -o "pixelsize=[0-9][0-9]*" | grep -o "[0-9][0-9]*")
 	if [ "$fccatmsggrep" != "" ]; then
 		numberstring=$(echo "$fccatmsggrep" | sort -n | uniq | fzf -e --reverse --prompt="< $SELECTFONTSIZEMSG >")
 		if [ "$numberstring" == "" ]; then
