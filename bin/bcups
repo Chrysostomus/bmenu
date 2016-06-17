@@ -7,54 +7,97 @@ NC='\e[0m'
 browser='elinks'
 printers=$(lpstat -p -d | awk '/printer/ {print $2}')
 enabled_printers=$(lpstat -p -d | awk '/enabled/ {print $2}')
+STATUSVAR=1
+
+# Service messages section
+CONTINMSG="$BLUE Press any key to continue$NC"
+ERRORMSG="$RED Wrong.$NC"
+TRYAGAINMSG="$RED Press any key and try again$NC"
+XSANEINSTMSG="Xsane is not installed and pacman seems to be in use"
+SELECTDEFAULTPRINTERMSG="Select new default printer"
+DEFAULTPRINTERSETMSG="The new default printer has been set"
+SELECTFILESFORPRINTMSG="Select the files to print (use TAB to mark files for printing)"
+SELECTPRINTERTOUSEMSG="Select the printer to use"
+SELECTFILESFORPRINTINGMSG="Select the files to print (use TAB to mark files for printing)"
+PRINTINGMSG="Printing now"
+SEARCHINGSCANNERSMSG="Searching for scanners... Select one"
+SELECTDEFAULTSCANNERMSG="Searching for scanners... Select new default"
+IMGFILETYPECHOOSEMSG="Which filetype should be used? "
+NAMEFORSCANNEDFILEMSG="What name shall be given to the scanned file?"
+
+function pressanykeyrequest {
+	echo -e "$CONTINMSG"
+	read -s -n1
+	STATUSVAR=1
+}
 
 function scanner_interface {
 	if [ -e /usr/bin/xsane ]; then
 		xsane
+		STATUSVAR=$?
 	else
 		if [ - e /var/lib/pacman/db.lck ]; then 
-			echo "Xsane is not installed and pacman seems to be in use"
+			echo "$XSANEINSTMSG"
+			STATUSVAR=$?
 		else 
 			sudo pacman -Sy xsane && xsane
+			STATUSVAR=$?
 		fi
 	fi
+return $STATUSVAR
 }
 
 function webinterface {
   $browser http://localhost:631
+  STATUSVAR=$?
+return $STATUSVAR
 }
 
 function set_default_printer {
-  lpoptions -d $(echo $printers | fzf -e --reverse --prompt='Select new default printer >')
-  echo ""
-  echo ""
-  echo "The new default printer has been set"
+  lpoptions -d $(echo $printers | fzf -e --reverse --prompt="$SELECTDEFAULTPRINTERMSG >")
+  STATUSVAR=$?
+  if [ $STATUSVAR -eq 0 ]; then
+  	echo ""
+  	echo ""
+  	echo "$DEFAULTPRINTERSETMSG"
+  fi
+return $STATUSVAR
 }
 
 function print_file {
   grep -q "Default" ~/.cups/lpoptions && \
-  lpr $(fzf -m --reverse --prompt='Select the files to print (use TAB to mark files for printing) >') || \
-  lpr -P $(echo $printers | fzf -e --reverse --prompt='Select the printer to use >') $(fzf -m --reverse --prompt='Select the files to print (use TAB to mark files for printing) >')
-  echo ""
-  echo ""
-  echo "Printing now"
-  sleep 3
+  lpr $(fzf -m --reverse --prompt=" $SELECTFILESFORPRINTMSG >") || \
+  lpr -P $(echo $printers | fzf -e --reverse --prompt="$SELECTPRINTERTOUSEMSG >") $(fzf -m --reverse --prompt="$SELECTFILESFORPRINTINGMSG >")
+  STATUSVAR=$?
+  if [ $STATUSVAR -eq 0 ]; then
+  	echo ""
+  	echo ""
+  	echo "$PRINTINGMSG"
+  	sleep 3
+  fi
+return $STATUSVAR
 }
 
 function select_scanner {
-  scanimage -L 2> /dev/null | fzf -e --reverse --prompt='Searching for scanners... Select one >' | awk '{print substr($2, 2, length($2) - 2)}'
+  scanimage -L 2> /dev/null | fzf -e --reverse --prompt="$SEARCHINGSCANNERSMSG >" | awk '{print substr($2, 2, length($2) - 2)}'
+  STATUSVAR=$?
+return $STATUSVAR
 }
 
 function set_default_scanner {
-  default_scan=$(scanimage -L 2> /dev/null | \
-  fzf -e --reverse --prompt='Searching for scanners... Select new default >' | \
+  default_scanner=$(scanimage -L 2> /dev/null | \
+  fzf -e --reverse --prompt="$SELECTDEFAULTSCANNERMSG >" | \
   awk '{print $2} {print substr($2, 2, length($2) - 2)}')
-  echo "export SANE_DEFAULT_DEVICE=$(default_scan)" >> $HOME/.profile
-  SANE_DEFAULT_DEVICE=$(default_scan)
+  STATUSVAR=$?
+  if [ $STATUSVAR -eq 0 ] && [ "$default_scanner" != "" ]; then
+  	echo "export SANE_DEFAULT_DEVICE=$default_scanner" >> $HOME/.profile
+  	SANE_DEFAULT_DEVICE="$default_scanner"
+  fi
+return $STATUSVAR  
 }
 
 function select_filetype {
-PS3="Which filetype should be used? "
+PS3="$IMGFILETYPECHOOSEMSG"
 # Gather the results in an array.
 filetypes=("pnm" "tiff" "png" "jpeg")
 
@@ -68,18 +111,44 @@ done
 }
 
 function scan {
-  echo "What name shall be given to the scanned file?"
+  echo "$NAMEFORSCANNEDFILEMSG"
   read filename
-  eval filetype=$(select_filetype)
-  scanner=$(select_scanner)
-  scanimage -p -d $scanner --format=$filetype > $filename.$filetype
+  # check file name function needs
+  if [ "$filename" != "" ]; then
+  	eval filetype=$(select_filetype)
+  	if [ "$filetype" != "" ]; then
+  	  	scanner=$(select_scanner)
+  		if [ "$scanner" != "" ]; then
+  			scanimage -p -d $scanner --format=$filetype > $filename.$filetype
+  			STATUSVAR=$?
+  		else
+  			STATUSVAR=1
+  		fi
+  	else
+  		STATUSVAR=1
+  	fi
+  else
+  	STATUSVAR=1
+  fi	
+return $STATUSVAR  		
 }
 
 function default_scan {
-  echo "What name shall be given to the scanned file?"
+  echo "$NAMEFORSCANNEDFILEMSG"
   read filename
-  eval filetype=$(select_filetype)
-  scanimage -p --format=$filetype > $filename.$filetype
+  # check file name function needs
+  if [ "$filename" != "" ]; then
+  	eval filetype=$(select_filetype)
+  	if [ "$filetype" != "" ]; then
+  	  	scanimage -p --format=$filetype > $filename.$filetype
+  		STATUSVAR=$?
+  	else
+  		STATUSVAR=1
+  	fi
+  else
+  	STATUSVAR=1
+  fi
+return $STATUSVAR
 }
 
 
@@ -101,52 +170,89 @@ function main {
         1)
             echo
             webinterface
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         2)
             echo
             print_file
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         3)
             echo
             set_scanner
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         4)
             echo
             lpstat -p -d
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         5)
             echo
             set_default_scanner
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         6)
             echo
             scanner_inerface
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         7)
             echo
             scanimage -L 2> /dev/null
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         8)
             echo
             default_scan
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         0)
             clear && exit
-            read
             ;;
         *)
-            echo -e "$RED Wrong option $NC"
-            echo "Wait and try again later..."
-            echo ""
-            sleep 3
+            echo -e "$ERRORMSG$TRYAGAINMSG"
+            read -s -n1
             clear
             ;;
     esac

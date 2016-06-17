@@ -226,7 +226,7 @@ function main {
         *)
             echo -e "$ERRORMSG$TRYAGAINMSG"
             read -s -n1
-	    clear
+	        clear
             ;;
     esac
     done
