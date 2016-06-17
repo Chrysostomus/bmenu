@@ -4,7 +4,7 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
-STATUSVAR=0
+STATUSVAR=1
 TEXTEDITOR=$EDITOR
 
 # Service messages section
@@ -18,8 +18,12 @@ SERVICESTARTEDMSG=" was started successfully"
 SERVICEENABLEDMSG=" was enabled successfully"
 SERVICESTOPPEDMSG=" was stopped successfully"
 SERVICEDISABLEDMSG=" was disabled successfully"
-STARTTIMEMSG="$ORANGE      Start time$NC"
-BOOTSERVICEMSG="$ORANGE Boot service$NC"
+
+function pressanykeyrequest {
+	echo -e "$CONTINMSG"
+	read -s -n1
+	STATUSVAR=1
+}
 
 function config_editor {
 PS3="$SELECTFILEMSG"
@@ -108,6 +112,7 @@ function enable_services {
 	else
 		STATUSVAR=1
 	fi
+return $STATUSVAR
 }
 
 function start_services {
@@ -120,6 +125,7 @@ function start_services {
 	else
 		STATUSVAR=1
 	fi
+return $STATUSVAR
 }
 
 function stop_services {
@@ -132,6 +138,7 @@ function stop_services {
 	else
 		STATUSVAR=1
 	fi
+return $STATUSVAR
 }
 
 function disable_services {
@@ -144,7 +151,7 @@ function disable_services {
 	else
 		STATUSVAR=1
 	fi
-
+return $STATUSVAR
 }
 
 function main {
@@ -166,68 +173,58 @@ function main {
         1)
             echo
             enable_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEENABLEDMSG"
-		    echo -e "$CONTINMSG"
-		    read -s -n1
-	    else
-		    echo ""
-	    fi
-	    STATUSVAR=0
+            STATUSVAR=$?
+	    	if [ $STATUSVAR -eq 0 ]; then
+		    	echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEENABLEDMSG"
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         2)
             echo
             disable_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEDISABLEDMSG"
-		    echo -e "$CONTINMSG"
-		    read -s -n1
-	    else
-		    echo ""
-	    fi
-	    STATUSVAR=0
+            STATUSVAR=$?
+	    	if [ $STATUSVAR -eq 0 ]; then
+		    	echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICEDISABLEDMSG"
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         3)
             echo
             start_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTARTEDMSG"
-		    echo -e "$CONTINMSG"
-		    read -s -n1
-	    else
-		    echo""
-	    fi
-	    STATUSVAR=0
+            STATUSVAR=$?
+	    	if [ $STATUSVAR -eq 0 ]; then
+		    	echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTARTEDMSG"
+		    	pressanykeyrequest
+	    	else
+		    	echo""
+	    	fi
             ;;
         4)
             echo
             stop_services
-	    if [ $STATUSVAR -eq 0 ]
-	    then
-		    echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTOPPEDMSG"
-		    echo -e "$CONTINMSG"
-		    read -s -n1
-	    else
-		    echo ""
-	    fi
-	    STATUSVAR=0
-	    ;;
+            STATUSVAR=$?
+	    	if [ $STATUSVAR -eq 0 ]; then
+		    	echo -e "$SERVICEPREFIXMSG$OUTPUTITEM$SERVICESTOPPEDMSG"
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
+	    	;;
         5)
             echo
             systemctl
             echo ""
-            echo -e "$CONTINMSG"
-            read -s -n1
+            pressanykeyrequest
             ;;
         6)
             echo
             dmesg
             echo ""
-            echo -e "$CONTINMSG"
-            read -s -n1
+            pressanykeyrequest
             ;;
         7)
             echo
@@ -241,12 +238,10 @@ function main {
             ;;
         9)
             echo
-	    clear
-	    echo -e "$STARTTIMEMSG$BOOTSERVICEMSG"
+	    	clear
             systemd-analyze blame
             echo ""
-            echo -e "$CONTINMSG"
-            read -s -n1
+            pressanykeyrequest
             ;;
         0)
             clear && exit

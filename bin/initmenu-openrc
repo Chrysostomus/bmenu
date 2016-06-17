@@ -4,28 +4,47 @@ RED='\e[41m'
 BLUE='\e[44m'
 ORANGE='\e[46m'
 NC='\e[0m'
+STATUSVAR=1
+TEXTEDITOR=$EDITOR
+
+# Service messages section
+CONTINMSG="$BLUE Press any key to continue$NC"
+ERRORMSG="$RED Wrong.$NC"
+TRYAGAINMSG="$RED Press any key and try again$NC"
+SELECTFILEMSG="Select file to configure and press Enter: "
+SERVICEPREFIXMSG="Service "
+SERVICESTARTEDMSG=" was started successfully"
+SERVICEENABLEDMSG=" was enabled successfully"
+SERVICESTOPPEDMSG=" was stopped successfully"
+SERVICEDISABLEDMSG=" was disabled successfully"
+
+function pressanykeyrequest {
+	echo -e "$CONTINMSG"
+	read -s -n1
+	STATUSVAR=1
+}
 
 function config_editor {
-PS3="Select file to configure: "
+PS3="$SELECTFILEMSG"
 configs=("xdm" "rc.local" "sysctl.conf" "modules" "cancel")
 
 select pick in "${configs[@]}"
 do
 	case $pick in
 		xdm)
-			sudo nano /etc/conf.d/xdm
+			sudo $EDITOR /etc/conf.d/xdm
 			break
 			;;		
 		rc.local)
-			sudo nano /etc/rc.local
+			sudo $EDITOR /etc/rc.local
 			break
 			;;		
 		sysctl.conf)
-			sudo nano /etc/sysctl.conf
+			sudo $EDITOR /etc/sysctl.conf
 			break
 			;;		
 		modules)
-			sudo nano /etc/conf.d/modules
+			sudo $EDITOR /etc/conf.d/modules
 			break
 			;;		
 		cancel)
@@ -36,20 +55,29 @@ done
 
 function enable_services {
 	sudo rc-update add $(rc-status -s | awk '/stopped/ {print $1}' | fzf -m -e --reverse)
+	STATUSVAR=$?
+return $STATUSVAR	
 }
 
 function start_services {
 	sudo rc-service start $(rc-status -s | awk '/stopped/ {print $1}' | fzf -m -e --reverse)
+	STATUSVAR=$?
+return $STATUSVAR
 }
 
 function stop_services {
 	sudo rc-service stop $(rc-status -s | awk '/started/ {print $1}' | fzf -m -e --reverse)
+	STATUSVAR=$?
+return $STATUSVAR
 }
 
 function disable_services {
 	sudo rc-update del $(rc-status -s | awk '/started/ {print $1}' | fzf -m -e --reverse)
+	STATUSVAR=$?
+return $STATUSVAR
 }
 
+function main {
     while true; do
     clear
     echo ""
@@ -67,32 +95,58 @@ function disable_services {
         1)
             echo
             enable_services
-            echo ""
+            STATUSVAR=$?
+	    	if [ $STATUSVAR -eq 0 ]; then
+		    	echo -e "$SERVICEPREFIXMSG$SERVICEENABLEDMSG"
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         2)
             echo
             disable_services
-            echo ""
+            STATUSVAR=$?
+	    	if [ $STATUSVAR -eq 0 ]; then
+		    	echo -e "$SERVICEPREFIXMSG$SERVICEDISABLEDMSG"
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         3)
             echo
             start_services
-            echo ""
+            STATUSVAR=$?
+	    	if [ $STATUSVAR -eq 0 ]; then
+		    	echo -e "$SERVICEPREFIXMSG$SERVICESTARTEDMSG"
+		    	pressanykeyrequest
+	    	else
+		    	echo""
+	    	fi
             ;;
         4)
             echo
             stop_services
-            echo ""
+            STATUSVAR=$?
+            if [ $STATUSVAR -eq 0 ]; then
+		    	echo -e "$SERVICEPREFIXMSG$SERVICESTOPPEDMSG"
+		    	pressanykeyrequest
+	    	else
+		    	echo ""
+	    	fi
             ;;
         5)
             echo
             rc-status
             echo ""
+            pressanykeyrequest
             ;;
         6)
             echo
             dmesg
             echo ""
+            pressanykeyrequest
             ;;
         7)
             echo
@@ -101,15 +155,13 @@ function disable_services {
             ;;
         0)
             clear && exit
-            read
             ;;
         *)
-            echo -e "$RED Wrong option $NC"
-            echo "Wait and try again later..."
-            echo ""
-            sleep 3
+            echo -e "$ERRORMSG$TRYAGAINMSG"
+            read -s -n1
             clear
             ;;
     esac
     done
-fi
+}
+main
