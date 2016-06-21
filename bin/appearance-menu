@@ -16,7 +16,9 @@ TEXTEDITOR=$EDITOR
 CONTINMSG="$BLUE Press any key to continue$NC"
 ERRORMSG="$RED Wrong.$NC"
 TRYAGAINMSG="$RED Press any key and try again$NC"
-AVAILABLETHEMESMSG="Available themes:"
+CURRENTPREFIXMSG="(current: "
+CURRENTSUFFIXMSG="):"
+AVAILABLETHEMESMSG="Available themes "
 PS31MSG="Choose new gtk2 theme:"
 PS32MSG="Choose new gtk3 theme:"
 PS33MSG="Choose new icon theme:"
@@ -34,8 +36,8 @@ FONTSIZESETMSG=" with size "
 FONTSIZEERRMSG="$RED Value is out of range$NC"
 SELECTEDFONTMSG="Selected font is: "
 INPUTFONTSIZEMSG="Input font size value in range from $MINFONTSIZE to $MAXFONTSIZE or just press Escape to discard changes"
-SELECTFONTSIZEMSG="Select font size value"
-CHOOSEFONTPROMPTMSG="Choose new font to use"
+SELECTFONTSIZEMSG="Select font size value "
+CHOOSEFONTPROMPTMSG="Choose new font to use "
 SETSUFFIXMSG=" was set successfully"
 TOGGLEDARKTHEMEMSG="Done"
 
@@ -100,6 +102,37 @@ function pressanykeyrequest {
 	STATUSVAR=1
 }
 
+function current_item_get {
+ cig_input="$@"
+ CURRENTITEM=""
+ case $cig_input in
+ 	gtk2theme)
+ 		CURRENTITEM=$(cat $HOME/.gtkrc-2.0 | grep -Po 'gtk-theme-name="\K[^"]*')
+ 		echo "$CURRENTITEM"
+ 		;;
+ 	gtk3theme)
+ 		CURRENTITEM=$(cat $HOME/.config/gtk-3.0/settings.ini | grep -Po 'gtk-theme-name=\K.*')
+ 		echo "$CURRENTITEM"
+ 		;;
+ 	icontheme)
+ 		CURRENTITEM=$(cat $HOME/.config/gtk-3.0/settings.ini | grep -Po 'gtk-icon-theme-name=\K.*')
+ 		echo "$CURRENTITEM"
+ 		;;
+ 	pointertheme)
+ 		CURRENTITEM=$(cat $HOME/.config/gtk-3.0/settings.ini | grep -Po 'gtk-cursor-theme-name=\K.*')
+ 		echo "$CURRENTITEM"
+ 		;;
+ 	gtkfontsize)
+ 		CURRENTITEM=$(cat $HOME/.config/gtk-3.0/settings.ini | grep -Po 'gtk-font-name=\K.*' | grep -Po '\t*\s*\K[0-9]{1,2}')
+ 		echo "$CURRENTITEM"
+ 		;;
+ 	gtkfontname)
+ 		CURRENTITEM=$(cat $HOME/.config/gtk-3.0/settings.ini | grep -Po 'gtk-font-name=\K.*' | grep -Po '.*[^0-9]{1,2}' | sed 's/[[:blank:]]*$//')
+ 		echo "$CURRENTITEM"
+ esac
+ return 0
+}
+
 function set_gtk2_theme {
 	new_theme="$@"
 	cp $HOME/.gtkrc-2.0 $HOME/.gtkrc-2.0.bak && sed -i "s/$(grep "gtk-theme-name" $HOME/.gtkrc-2.0)/gtk-theme-name=\"$new_theme\"/g" $HOME/.gtkrc-2.0
@@ -108,8 +141,9 @@ function set_gtk2_theme {
 }
 
 function choose_gtk2_theme {
-	echo $AVAILABLETHEMESMSG
-	PS3=$PS31MSG
+	CURRENTITEM=$(current_item_get "gtk2theme")
+	echo "$AVAILABLETHEMESMSG$CURRENTPREFIXMSG$CURRENTITEM$CURRENTSUFFIXMSG"
+	PS3="$PS31MSG"
 	CANCELSTATUS=0
 	SELECTEDITEM=""
 	# Gather the results in an array.
@@ -150,8 +184,9 @@ function set_gtk3_theme {
 }
 
 function choose_gtk3_theme {
-	echo $AVAILABLETHEMESMSG
-	PS3=$PS32MSG
+	CURRENTITEM=$(current_item_get "gtk3theme")
+	echo "$AVAILABLETHEMESMSG$CURRENTPREFIXMSG$CURRENTITEM$CURRENTSUFFIXMSG"
+	PS3="$PS32MSG"
 	CANCELSTATUS=0
 	SELECTEDITEM=""
 	# Gather the results in an array.
@@ -193,8 +228,9 @@ function set_icon_theme {
 }
 
 function choose_icon_theme {
-	echo $AVAILABLETHEMESMSG
-	PS3=$PS33MSG
+	CURRENTITEM=$(current_item_get "icontheme")
+	echo "$AVAILABLETHEMESMSG$CURRENTPREFIXMSG$CURRENTITEM$CURRENTSUFFIXMSG"
+	PS3="$PS33MSG"
 	CANCELSTATUS=0
 	SELECTEDITEM=""
 	# Gather the results in an array.
@@ -237,8 +273,9 @@ function set_pointer_theme {
 }
 
 function choose_pointer_theme {
-	echo $AVAILABLETHEMESMSG
-	PS3=$PS34MSG
+	CURRENTITEM=$(current_item_get "pointertheme")
+	echo "$AVAILABLETHEMESMSG$CURRENTPREFIXMSG$CURRENTITEM$CURRENTSUFFIXMSG"
+	PS3="$PS34MSG"
 	CANCELSTATUS=0
 	SELECTEDITEM=""
 	# Gather the results in an array.
@@ -283,10 +320,11 @@ function numberinputprocedure {
 	# because selected font is a size scalable one.
 	# If we found pixelsize items for selected font 
 	# user selects size in range of these items.
+	CURRENTITEM=$(current_item_get "gtkfontsize")
 	fccatmsggrep=""
 	fccatmsggrep=$(fc-cat -r 2> /dev/null | grep "\"$font_family" | grep -o "pixelsize=[0-9][0-9]*" | grep -o "[0-9][0-9]*")
 	if [ "$fccatmsggrep" != "" ]; then
-		numberstring=$(echo "$fccatmsggrep" | sort -n | uniq | fzf -e --reverse --prompt="< $SELECTFONTSIZEMSG >")
+		numberstring=$(echo "$fccatmsggrep" | sort -n | uniq | fzf -e --reverse --prompt="< $SELECTFONTSIZEMSG$CURRENTPREFIXMSG$CURRENTITEM$CURRENTSUFFIXMSG >")
 		if [ "$numberstring" == "" ]; then
 			number=0
 			return 1
@@ -295,7 +333,7 @@ function numberinputprocedure {
 			return 0
 		fi
 	else
-		echo -e "$INPUTFONTSIZEMSG"
+		echo -e "$INPUTFONTSIZEMSG$CURRENTPREFIXMSG$CURRENTITEM$CURRENTSUFFIXMSG"
     	manualnumberinput
     	checkfontsize $number
     	STATUSVAR=$?
@@ -357,7 +395,8 @@ function set_font {
 function choose_font {
 	new_font=""
 	font_size=0
-	SELECTEDITEM=$(fc-list : family | tr , \\n | sort | uniq | fzf -e --reverse --prompt="< $CHOOSEFONTPROMPTMSG >")
+	CURRENTITEM=$(current_item_get "gtkfontname")
+	SELECTEDITEM=$(fc-list : family | tr , \\n | sort | uniq | fzf -e --reverse --prompt="< $CHOOSEFONTPROMPTMSG$CURRENTPREFIXMSG$CURRENTITEM$CURRENTSUFFIXMSG >")
 	if [ "$SELECTEDITEM" != "" ]; then
 		new_font="$SELECTEDITEM"
 		echo -e "$SELECTEDFONTMSG$SELECTEDITEM"
