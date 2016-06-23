@@ -13,20 +13,24 @@ SELECTEDITEM=""
 CONTINMSG="$BLUE Press any key to continue$NC"
 ERRORMSG="$RED Wrong.$NC"
 TRYAGAINMSG="$RED Press any key and try again$NC"
-PS3SHELLCHOOSMSG="Which shell do you wish to use as default? "
+CURRENTPREFIXMSG="(current: "
+CURRENTSUFFIXMSG="):"
+AVAILABLESHELLMSG="Available shells "
+AVAILABLEDMMSG="Available display managers "
+PS3SHELLCHOOSMSG="Which shell do you wish to install and use as default? "
 ZSH1MSG="Z shell. Advanced and versatile shell with supreme configuration options and tab completion. Master of all trades, jack of none, but really needs configuration."
 ZSH2MSG="check oh-my-zsh or builtin configuration tool for configurations"
 ZSH3MSG="you might also like zsh-history-substring search or zsh-syntax-highlighting"
 BASH1MSG="Bourne again shell. Standard for most linux systems. Respectable choice for any use. Jack of all trades, master of none."
 FISH1MSG="Friendly interactive shell. Bad for scripting, great for interactive use without much configuration required."
 DASH1MSG="Debian almquist shell. Super light and feature free. Great for scripting and fast startup, entirely unsuitable for interactive use."
-PS3DISPLAYMNGMSG="Which displaymanager do you wish to use? "
+PS3DISPLAYMNGMSG="Which displaymanager do you wish to install and use as default? "
 PS3DISKUTILSMSG="Select tool to use? "
 HIBERNATIONSETUPMSG="Enable delayed hibernation service? (y/n)"
 PS3CHOOSESESSIONMSG="Which session do you wish to use as default? "
 NOSUPPORTAUTOLOGINMSG="No support for setting up autologin without displaymanager on openrc. Yet."
 GDMWONTWORKMSG="gdm will not work with openrc"
-CURRENTSHELLMSG="Your current shell is $(echo $SHELL)"
+CURRENTSHELLMSG="$(echo $SHELL)"
 SETSUFFIXMSG=" was set successfully"
 SHELLPREFIXMSG="Shell "
 DISPLAYMGRPREFIXMSG="Display manager "
@@ -42,6 +46,7 @@ function pressanykeyrequest {
 }
 
 function shell_chooser {
+echo "$AVAILABLESHELLMSG$CURRENTPREFIXMSG$CURRENTSHELLMSG$CURRENTSUFFIXMSG"
 PS3="$PS3SHELLCHOOSMSG"
 SELECTEDITEM=""
 # Gather the results in an array.
@@ -122,6 +127,10 @@ return $STATUSVAR
 }
 
 function displaymanager {
+CURRENTITEM=$(dm_detect)
+if [ "$CURRENTITEM" == "" ]; then
+	CURRENTITEM="none"
+fi
 PS3="$PS3DISPLAYMNGMSG"
 SELECTEDITEM=""
 # Gather the results in an array.
@@ -131,6 +140,7 @@ STATUSVAR=$?
 if [ $STATUSVAR -eq 1 ]; then
 	return $STATUSVAR
 fi
+echo "$AVAILABLEDMMSG$CURRENTPREFIXMSG$CURRENTITEM$CURRENTSUFFIXMSG"
 select pick in "${dms[@]}"
 do
 	case $pick in
@@ -313,7 +323,7 @@ return $STATUSVAR
 function dm_detect {
 if [ $(cat /proc/1/comm) = "systemd" ]; then
 	for displaymanager in kdm gdm sddm lightdm lxdm slim mdm; do
-		systemctl cat display-manager.service | awk -F'/' '/^Exec/ {print $NF}'
+		systemctl cat display-manager.service 2> /dev/null | awk -F'/' '/^Exec/ {print $NF}'
 	done
 else
 	grep 'DISPLAYMANAGER=' /etc/conf.d/xdm | cut -d \" -f 2
@@ -479,7 +489,6 @@ function main {
             ;;
         5)
             echo
-            echo -e "$CURRENTSHELLMSG"
             shell_chooser
             STATUSVAR=$?
             if [ $STATUSVAR -eq 0 ]; then
