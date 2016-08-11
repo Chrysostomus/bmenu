@@ -42,7 +42,7 @@ do
 		system.conf)
 			[ -e /etc/systemd/system.conf.d/10-system.conf ] || \
 			sudo mkdir -p /etc/systemd/system.conf.d/ && \
-			sudo cp /etc/systemd/system.conf /etc/systemd/system.conf.d/10-logind.conf && \
+			sudo cp /etc/systemd/system.conf /etc/systemd/system.conf.d/10-system.conf && \
 			sudo $TEXTEDITOR /etc/systemd/system.conf.d/10-system.conf
 			break
 			;;		
