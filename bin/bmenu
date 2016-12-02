@@ -138,7 +138,7 @@ function main {
     echo ""
     echo -e "                          ::Main menu:: "
     echo -e " ┌─────────────────────────────────────────────────────────────┐"
-    echo -e " │    1   Kernels and drivers          2   Display             │"
+    echo -e " │    1   Hardware and drivers         2   Display             │"
     echo -e " │    3   Printers                     4   Appearance          │"
     echo -e " │    5   Package manager              6   Network             │"    
     echo -e " │    7   Sound                        8   Configuration       │"
