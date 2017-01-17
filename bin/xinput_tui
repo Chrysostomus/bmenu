@@ -97,9 +97,9 @@ fi
 
 toggle_horizontal_scrolling()
 {
-horizontal_scrolling_code=$(xinput --list-props $touchpad_id | grep "Horizonal Scroll Enabled" | awk '{print $5}' |  grep -o '[0-9]\+')
+horizontal_scrolling_code=$(xinput --list-props $touchpad_id | grep "Horizontal Scroll Enabled" | awk '{print $5}' |  grep -o '[0-9]\+')
 
-if [[ $(xinput --list-props $touchpad_id | grep "Horizonal Scroll Enabled" | awk '{print $6}' | head -n1) == 1 ]]; then
+if [[ $(xinput --list-props $touchpad_id | grep "Horizontal Scroll Enabled" | awk '{print $6}' | head -n1) == 1 ]]; then
 	xinput --set-prop $touchpad_id $horizontal_scrolling_code 0 && echo "Horizontal scrolling is now disabled" || echo "Something vent wrong"
 else
 	xinput --set-prop $touchpad_id $horizontal_scrolling_code 1 && echo "Horizontal scrolling is now enabled" || echo "Something vent wrong"		
