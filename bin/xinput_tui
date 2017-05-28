@@ -1,6 +1,6 @@
 #!/bin/bash
 ## xinput_tui
-touchpad_id=$(xinput --list | grep "Touchpad" | xargs -n 1 | grep "id=" | sed 's/id=//g')
+touchpad_id=$(xinput --list | grep "Touch[Pp]ad" | xargs -n 1 | grep "id=" | sed 's/id=//g')
 
 toggle_natural_scrolling()
 {
@@ -16,7 +16,7 @@ fi
 
 toggle_tap_to_click()
 {
-tap_to_click_code=$(xinput --list-props 10 | awk '/Tapping Enabled \(/ {print $4}' | grep -o '[0-9]\+')
+tap_to_click_code=$(xinput --list-props $touchpad_id | awk '/Tapping Enabled \(/ {print $4}' | grep -o '[0-9]\+')
 
 if [[ $(xinput --list-props $touchpad_id | awk '/Tapping Enabled \(/ {print $5}') == 1 ]]; then
 	xinput --set-prop $touchpad_id $tap_to_click_code 0 && echo "Tap to click is now disabled" || echo "Something vent wrong"
