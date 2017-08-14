@@ -172,7 +172,11 @@ function main {
             ;;
         5)
             echo
-            pacli
+            if [[ -e /usr/bin pacui ]]; then
+                pacui
+            else
+                pacli
+            fi
             echo ""
             ;;
         6)

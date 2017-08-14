@@ -417,9 +417,16 @@ function choose_font {
 function toggle_dark_theme {
 	grep -q "gtk-application-prefer-dark-theme=" $HOME/.config/gtk-3.0/settings.ini || echo "gtk-application-prefer-dark-theme=1" >> $HOME/.config/gtk-3.0/settings.ini
 	STATUSVAR=$?
-	grep -q "gtk-application-prefer-dark-theme=1" $HOME/.config/gtk-3.0/settings.ini && \
-	sed -i "s/gtk-application-prefer-dark-theme=1/gtk-application-prefer-dark-theme=0/g" $HOME/.config/gtk-3.0/settings.ini || \
-	sed -i "s/gtk-application-prefer-dark-theme=0/gtk-application-prefer-dark-theme=1/g" $HOME/.config/gtk-3.0/settings.ini
+	case $(awk -F= '/gtk-application-prefer-dark-theme/{print $2}' $HOME/.config/gtk-3.0/settings.ini) in
+		true) sed -i "s/gtk-application-prefer-dark-theme=true/gtk-application-prefer-dark-theme=false/g" $HOME/.config/gtk-3.0/settings.ini
+			;;
+		false) sed -i "s/gtk-application-prefer-dark-theme=false/gtk-application-prefer-dark-theme=true/g" $HOME/.config/gtk-3.0/settings.ini
+			;;
+		1) sed -i "s/gtk-application-prefer-dark-theme=1/gtk-application-prefer-dark-theme=0/g" $HOME/.config/gtk-3.0/settings.ini
+			;;
+		0) sed -i "s/gtk-application-prefer-dark-theme=0/gtk-application-prefer-dark-theme=1/g" $HOME/.config/gtk-3.0/settings.ini
+			;;
+	esac	
 	STATUSVAR+=$?
 	return $STATUSVAR
 }
